@@ -212,6 +212,7 @@ public class ProtocolProcessor {
             LOG.error("The MQTT login failure. Username={}", payload.userName());
             return;
         }
+        LOG.info("login success!");
         if (!mServer.m_initialized) {
             channel.close();
             return;
@@ -328,7 +329,7 @@ public class ProtocolProcessor {
                 }
                 
                 if (session != null && session.getUsername().equals(msg.payload().userName())) {
-                    pwd = AES.AESDecrypt(pwd, session.getSecret(), true);
+//                    pwd = AES.AESDecrypt(pwd, session.getSecret(), true);
                 } else {
                     LOG.error("Password decrypt failed of client {}", clientId);
                     failedNoSession(channel);
