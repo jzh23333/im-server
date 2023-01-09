@@ -342,22 +342,22 @@ public class ProtocolProcessor {
 //                    return false;
 //                }
 
-                if(session.getPlatform() == ProtoConstants.Platform.Platform_Android || session.getPlatform() == ProtoConstants.Platform.Platform_APad) {
-                    byte[] signature = msg.payload().signatureInBytes();
-                    String basedSign = null;
-                    if (signature != null && signature.length > 0) {
-                        signature = AES.AESDecrypt(signature, session.getSecret(), true);
-                    }
-                    if (signature != null && signature.length > 0) {
-                        basedSign = Base64.getEncoder().encodeToString(signature);
-                    }
-
-                    if (!m_messagesStore.checkSignature(basedSign)) {
-                        LOG.error("Bad signature of session <{}, {}>", session.getUsername(), session.getClientID());
-                        failedBadSignature(channel);
-                        return false;
-                    }
-                }
+//                if(session.getPlatform() == ProtoConstants.Platform.Platform_Android || session.getPlatform() == ProtoConstants.Platform.Platform_APad) {
+//                    byte[] signature = msg.payload().signatureInBytes();
+//                    String basedSign = null;
+//                    if (signature != null && signature.length > 0) {
+//                        signature = AES.AESDecrypt(signature, session.getSecret(), true);
+//                    }
+//                    if (signature != null && signature.length > 0) {
+//                        basedSign = Base64.getEncoder().encodeToString(signature);
+//                    }
+//
+//                    if (!m_messagesStore.checkSignature(basedSign)) {
+//                        LOG.error("Bad signature of session <{}, {}>", session.getUsername(), session.getClientID());
+//                        failedBadSignature(channel);
+//                        return false;
+//                    }
+//                }
 
                 LOG.info("coming here 1");
 
