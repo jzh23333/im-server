@@ -359,6 +359,8 @@ public class ProtocolProcessor {
                     }
                 }
 
+                LOG.info("coming here 1");
+
                 session.setMqttVersion(mqttVersion);
             } else {
                 LOG.error("Client didn't supply any password and MQTT anonymous mode is disabled CId={}", clientId);
@@ -371,6 +373,8 @@ public class ProtocolProcessor {
 //                failedCredentials(channel);
 //                return false;
 //            }
+
+            LOG.info("coming here 2");
             NettyUtils.userName(channel, msg.payload().userName());
             return true;
         } else {
