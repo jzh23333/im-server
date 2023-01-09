@@ -335,11 +335,11 @@ public class ProtocolProcessor {
                     return false;
                 }
 
-                if (pwd == null) {
-                    LOG.error("Password decrypt failed of client {}", clientId);
-                    failedCredentials(channel);
-                    return false;
-                }
+//                if (pwd == null) {
+//                    LOG.error("Password decrypt failed of client {}", clientId);
+//                    failedCredentials(channel);
+//                    return false;
+//                }
 
                 if(session.getPlatform() == ProtoConstants.Platform.Platform_Android || session.getPlatform() == ProtoConstants.Platform.Platform_APad) {
                     byte[] signature = msg.payload().signatureInBytes();
@@ -364,12 +364,12 @@ public class ProtocolProcessor {
                 failedCredentials(channel);
                 return false;
             }
-            if (!m_authenticator.checkValid(clientId, msg.payload().userName(), pwd)) {
-                LOG.error("Authenticator has rejected the MQTT credentials CId={}, username={}, password={}",
-                        clientId, msg.payload().userName(), pwd);
-                failedCredentials(channel);
-                return false;
-            }
+//            if (!m_authenticator.checkValid(clientId, msg.payload().userName(), pwd)) {
+//                LOG.error("Authenticator has rejected the MQTT credentials CId={}, username={}, password={}",
+//                        clientId, msg.payload().userName(), pwd);
+//                failedCredentials(channel);
+//                return false;
+//            }
             NettyUtils.userName(channel, msg.payload().userName());
             return true;
         } else {
