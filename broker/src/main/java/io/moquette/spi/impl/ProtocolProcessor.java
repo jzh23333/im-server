@@ -312,6 +312,8 @@ public class ProtocolProcessor {
             if (msg.variableHeader().hasPassword()) {
                 pwd = msg.payload().passwordInBytes();
 
+                LOG.info("coming here 1");
+
                 MemorySessionStore.Session session = m_sessionsStore.getSession(clientId);
                 if (session == null) {
                     ErrorCode errorCode = m_sessionsStore.loadActiveSession(msg.payload().userName(), clientId);
@@ -321,6 +323,8 @@ public class ProtocolProcessor {
                     }
                     session = m_sessionsStore.getSession(clientId);
                 }
+
+                LOG.info("coming here 2");
 
                 if (session.getDeleted() != 0) {
                     LOG.error("user {} session {} is deleted. login failure", msg.payload().userName(), clientId);
@@ -359,7 +363,7 @@ public class ProtocolProcessor {
 //                    }
 //                }
 
-                LOG.info("coming here 1");
+                LOG.info("coming here 3");
 
                 session.setMqttVersion(mqttVersion);
             } else {
@@ -374,7 +378,7 @@ public class ProtocolProcessor {
 //                return false;
 //            }
 
-            LOG.info("coming here 2");
+            LOG.info("coming here 4");
             NettyUtils.userName(channel, msg.payload().userName());
             return true;
         } else {
