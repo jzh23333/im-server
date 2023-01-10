@@ -200,7 +200,7 @@ abstract public class IMHandler<T> {
                 ackPayload.ensureWritable(1).writeByte(errorCode.getCode());
 
                 try {
-                    LOG.debug("execute handler for topic {}", topic);
+                    LOG.info("execute handler for topic {}", topic);
                     errorCode = action(ackPayload, clientID, fromUser, requestSourceType, getDataObject(payloadContent), callbackWrapper);
                 } catch (IllegalAccessException e) {
                     e.printStackTrace();

@@ -185,6 +185,7 @@ public class ProtocolProcessor {
         MqttConnectPayload payload = msg.payload();
         String clientId = payload.clientIdentifier();
         LOG.info("Processing CONNECT message. CId={}, username={}", clientId, payload.userName());
+        LOG.info("CONNECT message is {}", msg);
 
         if (msg.variableHeader().version() < MqttVersion.MQTT_3_1_1.protocolLevel()) {
             MqttConnAckMessage badProto = connAck(CONNECTION_REFUSED_UNACCEPTABLE_PROTOCOL_VERSION);
@@ -194,6 +195,8 @@ public class ProtocolProcessor {
             channel.close();
             return;
         }
+
+        LOG.info("MQTT protocol version is {}", msg.variableHeader().version());
 
         if (clientId == null || clientId.length() == 0) {
             MqttConnAckMessage badId = connAck(CONNECTION_REFUSED_IDENTIFIER_REJECTED);
@@ -514,7 +517,8 @@ public class ProtocolProcessor {
     public void processPublish(Channel channel, MqttPublishMessage msg) {
         final MqttQoS qos = msg.fixedHeader().qosLevel();
         final String clientId = NettyUtils.clientID(channel);
-        
+
+        LOG.info("Processing PUBLISH message. message: {}", msg);
         LOG.info("Processing PUBLISH message. CId={}, topic={}, messageId={}, qos={}", clientId,
                 msg.variableHeader().topicName(), msg.variableHeader().packetId(), qos);
         switch (qos) {
