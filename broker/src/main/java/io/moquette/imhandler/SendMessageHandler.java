@@ -125,6 +125,7 @@ public class SendMessageHandler extends IMHandler<WFCMessage.Message> {
         ErrorCode errorCode = ErrorCode.ERROR_CODE_SUCCESS;
         boolean isAdmin = requestSourceType == ProtoConstants.RequestSourceType.Request_From_Admin;
         if (message != null) {
+            LOG.info("cid {} receive message {}", clientID, message);
             boolean ignoreMsg = false;
             if (!isAdmin) {  //admin do not check the right
                 // 不能在端上直接发送撤回和群通知

@@ -248,12 +248,10 @@ public class Qos1PublishHandler extends QosPublishHandler {
             return;
         }
 
-        LOG.info("topic {} receive message {}", imtopic, payload);
+        LOG.info("topic {} receive message {}", imtopic, payloadContent);
 
         MemorySessionStore.Session session = m_sessionStore.getSession(clientID);
         payloadContent = AES.AESDecrypt(payloadContent, session.getSecret(), true);
-
-        LOG.info("topic {} receive payloadContent {}", imtopic, payloadContent);
         imHandler(clientID, username, imtopic, payloadContent, (errorCode, ackPayload) -> sendPubAck(clientID, messageID, ackPayload, errorCode), ProtoConstants.RequestSourceType.Request_From_User);
     }
 
