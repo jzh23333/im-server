@@ -41,6 +41,7 @@ import io.moquette.spi.impl.security.AES;
 import io.netty.handler.codec.mqtt.MqttVersion;
 import io.netty.util.ReferenceCountUtil;
 import io.netty.util.internal.StringUtil;
+import jdk.internal.org.jline.utils.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -249,9 +250,13 @@ public class Qos1PublishHandler extends QosPublishHandler {
             sendPubAck(clientID, messageID, ackPayload, ERROR_CODE_INVALID_DATA);
             return;
         }
-        
+
+        Log.info("topic {} receive message {}", imtopic, payload);
+
         MemorySessionStore.Session session = m_sessionStore.getSession(clientID);
         payloadContent = AES.AESDecrypt(payloadContent, session.getSecret(), true);
+
+        Log.info("topic {} receive payloadContent {}", imtopic, payloadContent);
         imHandler(clientID, username, imtopic, payloadContent, (errorCode, ackPayload) -> sendPubAck(clientID, messageID, ackPayload, errorCode), ProtoConstants.RequestSourceType.Request_From_User);
     }
 

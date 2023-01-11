@@ -232,6 +232,7 @@ public class ProtocolProcessor {
 
         initializeKeepAliveTimeout(channel, msg, clientId);
         if (!sendAck(descriptor, msg, clientId)) {
+            LOG.warn("send Ack failure. CID={}", clientId);
             channel.close();
             return;
         }
@@ -407,6 +408,9 @@ public class ProtocolProcessor {
         long friendHead = m_messagesStore.getFriendHead(user);
         long friendRqHead = m_messagesStore.getFriendRqHead(user);
         long settingHead = m_messagesStore.getSettingHead(user);
+
+        LOG.info("messageHead is {}, friendHead is {}, friendRqHead is {}, settingHead is {}", messageHead, friendHead, friendRqHead, settingHead);
+
         WFCMessage.ConnectAckPayload payload = WFCMessage.ConnectAckPayload.newBuilder()
             .setMsgHead(messageHead)
             .setFriendHead(friendHead)
