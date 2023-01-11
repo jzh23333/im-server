@@ -21,6 +21,8 @@ public class PullMessageHandler extends IMHandler<WFCMessage.PullMessageRequest>
     public ErrorCode action(ByteBuf ackPayload, String clientID, String fromUser, ProtoConstants.RequestSourceType requestSourceType, WFCMessage.PullMessageRequest request, Qos1PublishHandler.IMCallback callback) {
         ErrorCode errorCode = ErrorCode.ERROR_CODE_SUCCESS;
 
+        LOG.info("pull request {}", request);
+
         if (request.getType() == ProtoConstants.PullType.Pull_ChatRoom && !m_messagesStore.checkUserClientInChatroom(fromUser, clientID, null)) {
             errorCode = ErrorCode.ERROR_CODE_NOT_IN_CHATROOM;
         } else {
