@@ -316,8 +316,6 @@ public class ProtocolProcessor {
             if (msg.variableHeader().hasPassword()) {
                 pwd = msg.payload().passwordInBytes();
 
-                LOG.info("coming here 1");
-
                 MemorySessionStore.Session session = m_sessionsStore.getSession(clientId);
                 if (session == null) {
                     ErrorCode errorCode = m_sessionsStore.loadActiveSession(msg.payload().userName(), clientId);
@@ -327,8 +325,6 @@ public class ProtocolProcessor {
                     }
                     session = m_sessionsStore.getSession(clientId);
                 }
-
-                LOG.info("coming here 2");
 
                 if (session.getDeleted() != 0) {
                     LOG.error("user {} session {} is deleted. login failure", msg.payload().userName(), clientId);
@@ -367,8 +363,6 @@ public class ProtocolProcessor {
 //                    }
 //                }
 
-                LOG.info("coming here 3");
-
                 session.setMqttVersion(mqttVersion);
             } else {
                 LOG.error("Client didn't supply any password and MQTT anonymous mode is disabled CId={}", clientId);
@@ -382,7 +376,6 @@ public class ProtocolProcessor {
 //                return false;
 //            }
 
-            LOG.info("coming here 4");
             NettyUtils.userName(channel, msg.payload().userName());
             return true;
         } else {
@@ -409,8 +402,6 @@ public class ProtocolProcessor {
         long friendRqHead = m_messagesStore.getFriendRqHead(user);
         long settingHead = m_messagesStore.getSettingHead(user);
 
-        LOG.info("messageHead is {}, friendHead is {}, friendRqHead is {}, settingHead is {}", messageHead, friendHead, friendRqHead, settingHead);
-
         WFCMessage.ConnectAckPayload payload = WFCMessage.ConnectAckPayload.newBuilder()
             .setMsgHead(messageHead)
             .setFriendHead(friendHead)
@@ -420,11 +411,15 @@ public class ProtocolProcessor {
             .build();
 
 
+        LOG.info("payload={}", payload);
+
         if (!msg.variableHeader().isCleanSession() && isSessionAlreadyStored) {
             okResp = connAckWithSessionPresent(CONNECTION_ACCEPTED, payload.toByteArray());
         } else {
             okResp = connAck(CONNECTION_ACCEPTED, payload.toByteArray());
         }
+
+        LOG.info("resp={}", okResp);
 
         descriptor.writeAndFlush(okResp);
         LOG.info("The connect ACK has been sent. CId={}", clientId);
