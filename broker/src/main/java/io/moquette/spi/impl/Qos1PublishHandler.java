@@ -239,9 +239,13 @@ public class Qos1PublishHandler extends QosPublishHandler {
 
         final int messageID = msg.variableHeader().packetId();
         String imtopic = topic.getTopic();
+
+        LOG.info("received publish qos 1: messageId {}, topic {}", messageID, imtopic);
+
         ByteBuf payload = msg.payload();
         byte[] payloadContent = readBytesAndRewind(payload);
         if(payloadContent.length == 0) {
+            LOG.info("no payload content");
             ByteBuf ackPayload = Unpooled.buffer();
             ackPayload.ensureWritable(1).writeByte(ERROR_CODE_INVALID_DATA.getCode());
             sendPubAck(clientID, messageID, ackPayload, ERROR_CODE_INVALID_DATA);

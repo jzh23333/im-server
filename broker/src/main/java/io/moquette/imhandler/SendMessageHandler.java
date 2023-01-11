@@ -125,7 +125,7 @@ public class SendMessageHandler extends IMHandler<WFCMessage.Message> {
         ErrorCode errorCode = ErrorCode.ERROR_CODE_SUCCESS;
         boolean isAdmin = requestSourceType == ProtoConstants.RequestSourceType.Request_From_Admin;
         if (message != null) {
-            LOG.info("cid {} send message {}", clientID, message);
+            LOG.info("cid {} send message: {}", clientID, message);
             boolean ignoreMsg = false;
             //admin do not check the right
             if (!isAdmin) {
