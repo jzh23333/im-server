@@ -320,6 +320,7 @@ public class ProtocolProcessor {
                 if (session == null) {
                     ErrorCode errorCode = m_sessionsStore.loadActiveSession(msg.payload().userName(), clientId);
                     if (errorCode != ErrorCode.ERROR_CODE_SUCCESS) {
+                        LOG.error("user {} session {} is no active. errorCode: {}", msg.payload().userName(), clientId, errorCode);
                         failedNoSession(channel);
                         return false;
                     }

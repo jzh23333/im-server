@@ -5,6 +5,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
+import java.util.Arrays;
 import java.util.Base64;
 
 import javax.crypto.BadPaddingException;
@@ -68,7 +69,11 @@ public class AES {
             byte byte3 = (byte)((curhour & 0xFF) >> 24);
             tobeencrypdatawithtime[3] = byte3;
 
+            System.out.println(Arrays.toString(tobeencrypdatawithtime));
+
             System.arraycopy(tobeencrypdata, 0, tobeencrypdatawithtime, 4, tobeencrypdata.length);
+
+            System.out.println(Arrays.toString(tobeencrypdatawithtime));
 
 
             byte[] encrypted = cipher.doFinal(tobeencrypdatawithtime);
@@ -128,16 +133,21 @@ public class AES {
                 return null;
             }
 
+            System.out.println(Arrays.toString(sSrc));
+
             SecretKeySpec skeySpec = new SecretKeySpec(aesKey, "AES");
             Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
             IvParameterSpec iv = new IvParameterSpec(aesKey);
             cipher.init(Cipher.DECRYPT_MODE, skeySpec, iv);
             try {
                 byte[] original = cipher.doFinal(sSrc);
+
+                System.out.println(Arrays.toString(original));
                 int hours = 0;
 
                 if (original.length > 4) {
                     hours += getUnsignedByte(original[3]);
+                    System.out.println(hours);
                     hours <<= 8;
 
                     hours += getUnsignedByte(original[2]);
@@ -167,5 +177,12 @@ public class AES {
             System.out.println(ex.toString());
             return null;
         }
+    }
+
+    public static void main(String[] args) {
+//        String msg = "nRvjFjcQCgxigI7z1ITKeA==";
+        String msg = "DWUe1qDA/c8ct1u2mLeeykDnbOyuB76lQAF2Eaw3rMW/Waatdg9ihQOAlATQlhCveA7gkAfRoxbR7NigZOR/yy1u3XjOiGG2e+ZbQfqrRxe5B2+VW73/59/bcG3AYlob9rABRoP0z09xr6PhiPYPikT0DduxeznmdDjd1g5uj7OpaJE2y+2sPffmZDIXDGy6";
+        String secret = "90e45fc2-4461-4de8-a75e-f5523726bbbb";
+        System.out.println(Arrays.toString(AES.AESDecrypt(Base64.getDecoder().decode(msg), "", true)));
     }
 }
