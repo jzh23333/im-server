@@ -28,7 +28,7 @@ public class PullMessageHandler extends IMHandler<WFCMessage.PullMessageRequest>
         } else {
             WFCMessage.PullMessageResult result = m_messagesStore.fetchMessage(fromUser, clientID, request.getId(), request.getType());
             byte[] data = result.toByteArray();
-            LOG.info("User {} pull message with count({}), payload size({})", fromUser, result.getMessageCount(), data.length);
+            LOG.info("User {} pull message with count({}), current: {}, head: {} payload size({})", fromUser, result.getMessageCount(), result.getCurrent(), result.getHead(), data.length);
             ackPayload.ensureWritable(data.length).writeBytes(data);
         }
         return errorCode;
