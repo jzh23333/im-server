@@ -327,6 +327,8 @@ public class MessagesPublisher {
                         .setHead(messageSeq)
                         .build();
 
+                    LOG.info("notifyMessage: {}", notifyMessage);
+
                     ByteBuf payload = Unpooled.buffer();
                     byte[] byteData = notifyMessage.toByteArray();
                     payload.ensureWritable(byteData.length).writeBytes(byteData);
