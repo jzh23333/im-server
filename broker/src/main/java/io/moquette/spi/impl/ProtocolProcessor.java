@@ -316,6 +316,8 @@ public class ProtocolProcessor {
             if (msg.variableHeader().hasPassword()) {
                 pwd = msg.payload().passwordInBytes();
 
+                LOG.info("password: {}", pwd);
+
                 MemorySessionStore.Session session = m_sessionsStore.getSession(clientId);
                 if (session == null) {
                     ErrorCode errorCode = m_sessionsStore.loadActiveSession(msg.payload().userName(), clientId);
@@ -334,35 +336,37 @@ public class ProtocolProcessor {
                 }
                 
                 if (session != null && session.getUsername().equals(msg.payload().userName())) {
-//                    pwd = AES.AESDecrypt(pwd, session.getSecret(), true);
+                    pwd = AES.AESDecrypt(pwd, session.getSecret(), true);
                 } else {
                     LOG.error("Password decrypt failed of client {}", clientId);
                     failedNoSession(channel);
                     return false;
                 }
 
-//                if (pwd == null) {
-//                    LOG.error("Password decrypt failed of client {}", clientId);
-//                    failedCredentials(channel);
-//                    return false;
-//                }
+                LOG.info("password: {}", new String(pwd));
 
-//                if(session.getPlatform() == ProtoConstants.Platform.Platform_Android || session.getPlatform() == ProtoConstants.Platform.Platform_APad) {
-//                    byte[] signature = msg.payload().signatureInBytes();
-//                    String basedSign = null;
-//                    if (signature != null && signature.length > 0) {
-//                        signature = AES.AESDecrypt(signature, session.getSecret(), true);
-//                    }
-//                    if (signature != null && signature.length > 0) {
-//                        basedSign = Base64.getEncoder().encodeToString(signature);
-//                    }
-//
-//                    if (!m_messagesStore.checkSignature(basedSign)) {
-//                        LOG.error("Bad signature of session <{}, {}>", session.getUsername(), session.getClientID());
-//                        failedBadSignature(channel);
-//                        return false;
-//                    }
-//                }
+                if (pwd == null) {
+                    LOG.error("Password decrypt failed of client {}", clientId);
+                    failedCredentials(channel);
+                    return false;
+                }
+
+                if(session.getPlatform() == ProtoConstants.Platform.Platform_Android || session.getPlatform() == ProtoConstants.Platform.Platform_APad) {
+                    byte[] signature = msg.payload().signatureInBytes();
+                    String basedSign = null;
+                    if (signature != null && signature.length > 0) {
+                        signature = AES.AESDecrypt(signature, session.getSecret(), true);
+                    }
+                    if (signature != null && signature.length > 0) {
+                        basedSign = Base64.getEncoder().encodeToString(signature);
+                    }
+
+                    if (!m_messagesStore.checkSignature(basedSign)) {
+                        LOG.error("Bad signature of session <{}, {}>", session.getUsername(), session.getClientID());
+                        failedBadSignature(channel);
+                        return false;
+                    }
+                }
 
                 session.setMqttVersion(mqttVersion);
             } else {
@@ -370,12 +374,12 @@ public class ProtocolProcessor {
                 failedCredentials(channel);
                 return false;
             }
-//            if (!m_authenticator.checkValid(clientId, msg.payload().userName(), pwd)) {
-//                LOG.error("Authenticator has rejected the MQTT credentials CId={}, username={}, password={}",
-//                        clientId, msg.payload().userName(), pwd);
-//                failedCredentials(channel);
-//                return false;
-//            }
+            if (!m_authenticator.checkValid(clientId, msg.payload().userName(), pwd)) {
+                LOG.error("Authenticator has rejected the MQTT credentials CId={}, username={}, password={}",
+                        clientId, msg.payload().userName(), pwd);
+                failedCredentials(channel);
+                return false;
+            }
 
             NettyUtils.userName(channel, msg.payload().userName());
             return true;
