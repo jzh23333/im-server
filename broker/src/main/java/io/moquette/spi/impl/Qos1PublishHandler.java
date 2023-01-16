@@ -252,12 +252,9 @@ public class Qos1PublishHandler extends QosPublishHandler {
             return;
         }
 
-        LOG.info("topic {} receive encrypt data {}", imtopic, payloadContent);
 
         MemorySessionStore.Session session = m_sessionStore.getSession(clientID);
         payloadContent = AES.AESDecrypt(payloadContent, session.getSecret(), true);
-
-        LOG.info("topic {} receive decrypt data {}", imtopic, payloadContent);
         imHandler(clientID, username, imtopic, payloadContent, (errorCode, ackPayload) -> sendPubAck(clientID, messageID, ackPayload, errorCode), ProtoConstants.RequestSourceType.Request_From_User);
     }
 
@@ -271,7 +268,7 @@ public class Qos1PublishHandler extends QosPublishHandler {
                 throw new RuntimeException("Internal bad error, found connectionDescriptors to null while it should " +
                     "be initialized, somewhere it's overwritten!!");
             }
-            LOG.info("clientIDs are {}", connectionDescriptors);
+//            LOG.info("clientIDs are {}", connectionDescriptors);
             if (!connectionDescriptors.isConnected(clientId)) {
                 throw new RuntimeException(String.format("Can't find a ConnectionDescriptor for client %s in cache %s",
                     clientId, connectionDescriptors));
