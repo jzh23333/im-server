@@ -55,6 +55,8 @@ public class ConnectionDescriptorStore implements IConnectionsManager {
                 LOG.debug("Sending {} message CId=<{}>", messageType, clientID);
             }
 
+            LOG.info("MqttMessage: {}", message);
+
             ConnectionDescriptor descriptor = connectionDescriptors.get(clientID);
             if (descriptor == null) {
                 if (messageID != null) {
