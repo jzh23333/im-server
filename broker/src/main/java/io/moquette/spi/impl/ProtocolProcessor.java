@@ -316,8 +316,6 @@ public class ProtocolProcessor {
             if (msg.variableHeader().hasPassword()) {
                 pwd = msg.payload().passwordInBytes();
 
-                LOG.info("password: {}", pwd);
-
                 MemorySessionStore.Session session = m_sessionsStore.getSession(clientId);
                 if (session == null) {
                     ErrorCode errorCode = m_sessionsStore.loadActiveSession(msg.payload().userName(), clientId);
@@ -342,8 +340,6 @@ public class ProtocolProcessor {
                     failedNoSession(channel);
                     return false;
                 }
-
-                LOG.info("password: {}", new String(pwd));
 
                 if (pwd == null) {
                     LOG.error("Password decrypt failed of client {}", clientId);
