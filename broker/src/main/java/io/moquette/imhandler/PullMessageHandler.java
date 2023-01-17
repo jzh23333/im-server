@@ -27,6 +27,7 @@ public class PullMessageHandler extends IMHandler<WFCMessage.PullMessageRequest>
             errorCode = ErrorCode.ERROR_CODE_NOT_IN_CHATROOM;
         } else {
             WFCMessage.PullMessageResult result = m_messagesStore.fetchMessage(fromUser, clientID, request.getId(), request.getType());
+            LOG.info("pull message: {}", result);
             byte[] data = result.toByteArray();
             LOG.info("User {} pull message with count({}), current: {}, head: {} payload size({})", fromUser, result.getMessageCount(), result.getCurrent(), result.getHead(), data.length);
             ackPayload.ensureWritable(data.length).writeBytes(data);
