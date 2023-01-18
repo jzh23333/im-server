@@ -23,6 +23,7 @@ import com.hazelcast.config.ClasspathXmlConfig;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.FileSystemXmlConfig;
 import com.hazelcast.core.*;
+import com.hazelcast.util.MD5Util;
 import com.xiaoleilu.loServer.LoServer;
 import com.xiaoleilu.loServer.ServerSetting;
 import com.xiaoleilu.loServer.action.Action;
@@ -43,6 +44,10 @@ import io.moquette.spi.security.ISslContextCreator;
 import io.moquette.spi.security.Tokenor;
 import io.netty.util.ResourceLeakDetector;
 import io.netty.util.internal.StringUtil;
+import org.eclipse.paho.client.mqttv3.MqttClient;
+import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
+import org.eclipse.paho.client.mqttv3.MqttException;
+import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import win.liyufan.im.DBUtil;
 
 import org.slf4j.Logger;
@@ -93,6 +98,8 @@ public class Server {
     private HazelcastInstance hazelcastInstance;
 
     private ProtocolProcessorBootstrapper m_processorBootstrapper;
+
+    private MqttClient mqttClient;
 
     private ThreadPoolExecutorWrapper dbScheduler;
     private ThreadPoolExecutorWrapper imBusinessScheduler;
@@ -285,9 +292,36 @@ public class Server {
         m_acceptor = new NettyAcceptor();
         m_acceptor.initialize(processor, config, sslCtxCreator);
 
+        initMqttClient(config);
 
         LOG.info("Moquette server has been initialized successfully");
         m_initialized = configured;
+    }
+
+    private void initMqttClient(IConfig config) {
+        String broker = String.format("%s://%s:%s",
+            "tcp",
+            config.getProperty(MQTT_SERVER_IP),
+            config.getProperty(MQTT_SERVER_PORT));
+        String clientId = MD5Util.toMD5String(config.getProperty(MQTT_SERVER_NODE_ID));
+        String username = config.getProperty(MQTT_SERVER_USERNAME);
+        String password = config.getProperty(MQTT_SERVER_PASSWORD);
+        MemoryPersistence persistence = new MemoryPersistence();
+        try {
+            mqttClient = new MqttClient(broker, clientId, persistence);
+            mqttClient.setCallback(new OnMessageCallback(clientId));
+
+            MqttConnectOptions options = new MqttConnectOptions();
+            options.setUserName(username);
+            options.setPassword(password.toCharArray());
+            options.setCleanSession(true);
+
+            LOG.info("Connection to emqx: " + broker);
+            mqttClient.connect(options);
+            LOG.info("emqx connected.");
+        } catch (MqttException e) {
+            LOG.error("init mqtt client failure", e);
+        }
     }
 
     private IStore initStore(IConfig props, Server server) {
@@ -460,7 +494,19 @@ public class Server {
         imBusinessScheduler.shutdown();
         callbackScheduler.shutdown();
 
+        disconnectMqttClient();
+
         LOG.info("Moquette server has been stopped.");
+    }
+
+    private void disconnectMqttClient() {
+        try {
+            mqttClient.disconnect();
+            LOG.info("emqx disconnected.");
+            mqttClient.close();
+        } catch (MqttException me) {
+            LOG.error("disconnect mqtt client failure", me);
+        }
     }
 
     /**

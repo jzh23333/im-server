@@ -29,6 +29,13 @@ public final class BrokerConstants {
     public static final String HTTP_SERVER_PORT = "http_port";
     public static final String HTTP_LOCAL_PORT = "local_port";
 
+    // add mqtt client config
+    public static final String MQTT_SERVER_IP = "mqtt.server.ip";
+    public static final String MQTT_SERVER_PORT = "mqtt.server.port";
+    public static final String MQTT_SERVER_NODE_ID = "mqtt.server.node_id";
+    public static final String MQTT_SERVER_USERNAME = "mqtt.server.username";
+    public static final String MQTT_SERVER_PASSWORD = "mqtt.server.password";
+
     public static final String HTTP_ADMIN_PORT = "http.admin.port";
     public static final String DEFAULT_MOQUETTE_STORE_MAP_DB_FILENAME = "moquette_store.mapdb";
     public static final String DEFAULT_PERSISTENT_PATH = System.getProperty("user.dir") + File.separator
