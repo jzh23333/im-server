@@ -14,6 +14,7 @@ import cn.wildfirechat.server.ThreadPoolExecutorWrapper;
 import com.google.gson.Gson;
 import com.google.protobuf.GeneratedMessage;
 import com.google.protobuf.InvalidProtocolBufferException;
+import io.moquette.server.CommonMessage;
 import io.moquette.server.Server;
 import io.moquette.spi.IMessagesStore;
 import io.moquette.spi.ISessionsStore;
@@ -270,19 +271,24 @@ abstract public class IMHandler<T> {
             // TODO find topic by username
             String topic = "single/1234";
             // TODO send message to emqx
-            MqttMessage mqttMessage = new MqttMessage(message.toByteArray());
+            CommonMessage commonMessage = new CommonMessage();
+            commonMessage.setPayload(message.toByteArray());
+            commonMessage.setFromUser(username);
+            commonMessage.setFromClientId(clientID);
+            MqttMessage mqttMessage = new MqttMessage(commonMessage.toByteArray());
             mqttMessage.setQos(1);
             mServer.getMqttClient().publish(topic, mqttMessage);
             LOG.info("Published success");
         } catch (MqttException e) {
             LOG.error("send message to mqtt server failure", e);
+        } catch (Exception e) {
+            LOG.error("serialize common message failure", e);
         }
-
-
-        WFCMessage.Message.Builder messageBuilder = message.toBuilder();
-        int pullType = m_messagesStore.getNotifyReceivers(username, messageBuilder, notifyReceivers, requestSourceType);
-        mServer.getImBusinessScheduler().execute(() -> this.publisher.publish2Receivers(messageBuilder.build(), notifyReceivers, clientID, pullType));
-        return notifyReceivers.size();
+//        WFCMessage.Message.Builder messageBuilder = message.toBuilder();
+//        int pullType = m_messagesStore.getNotifyReceivers(username, messageBuilder, notifyReceivers, requestSourceType);
+//        mServer.getImBusinessScheduler().execute(() -> this.publisher.publish2Receivers(messageBuilder.build(), notifyReceivers, clientID, pullType));
+//        return notifyReceivers.size();
+        return 0;
     }
 
     protected long saveAndBroadcast(String username, String clientID, WFCMessage.Message message) {

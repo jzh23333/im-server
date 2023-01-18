@@ -298,13 +298,13 @@ public class Server {
         m_acceptor = new NettyAcceptor();
         m_acceptor.initialize(processor, config, sslCtxCreator);
 
-        initMqttClient(config, processor.messagesPublisher);
+        initMqttClient(config, processor.messagesPublisher, m_store, instance);
 
         LOG.info("Moquette server has been initialized successfully");
         m_initialized = configured;
     }
 
-    private void initMqttClient(IConfig config, MessagesPublisher publisher) {
+    private void initMqttClient(IConfig config, MessagesPublisher publisher, IStore store, Server server) {
         String broker = String.format("%s://%s:%s",
             "tcp",
             config.getProperty(MQTT_SERVER_IP),
@@ -314,8 +314,10 @@ public class Server {
         String password = config.getProperty(MQTT_SERVER_PASSWORD);
         MemoryPersistence persistence = new MemoryPersistence();
         try {
+            OnMessageCallback callback = new OnMessageCallback();
+            callback.init(clientId, publisher, store, server);
             mqttClient = new MqttClient(broker, clientId, persistence);
-            mqttClient.setCallback(new OnMessageCallback(clientId, publisher));
+            mqttClient.setCallback(callback);
 
             MqttConnectOptions options = new MqttConnectOptions();
             options.setUserName(username);
