@@ -75,8 +75,7 @@ public class ProtocolProcessorBootstrapper {
      * @return the processor created for the broker.
      */
     public ProtocolProcessor init(IConfig props, List<? extends InterceptHandler> embeddedObservers,
-            IAuthenticator authenticator, IAuthorizator authorizator, Server server, IStore store,
-                                  MqttClient mqttClient) {
+            IAuthenticator authenticator, IAuthorizator authorizator, Server server, IStore store) {
         IMessagesStore messagesStore;
         messagesStore = store.messagesStore();
         m_sessionsStore = store.sessionsStore();
@@ -119,7 +118,7 @@ public class ProtocolProcessorBootstrapper {
 
         LOG.info("Initializing MQTT protocol processor...");
         m_processor.init(connectionDescriptors, messagesStore, m_sessionsStore, authenticator, authorizator,
-            interceptor, server, mqttClient);
+            interceptor, server);
         return m_processor;
     }
 

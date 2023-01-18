@@ -138,8 +138,6 @@ public class ProtocolProcessor {
 
     private Server mServer;
 
-    private MqttClient m_mqttClient;
-
     ProtocolProcessor() {
 
     }
@@ -158,7 +156,7 @@ public class ProtocolProcessor {
      */
     void init(ConnectionDescriptorStore connectionDescriptors,
               IMessagesStore storageService, ISessionsStore sessionsStore, IAuthenticator authenticator, IAuthorizator authorizator,
-              BrokerInterceptor interceptor, Server server, MqttClient mqttClient) {
+              BrokerInterceptor interceptor, Server server) {
         LOG.info("Initializing MQTT protocol processor...");
         this.connectionDescriptors = connectionDescriptors;
         this.m_interceptor = interceptor;
@@ -173,10 +171,9 @@ public class ProtocolProcessor {
 
         LOG.info("Initializing QoS publish handlers...");
         this.qos1PublishHandler = new Qos1PublishHandler(m_authorizator, m_messagesStore, m_interceptor,
-                this.connectionDescriptors, this.messagesPublisher, sessionsStore, server.getImBusinessScheduler(), server, mqttClient);
+                this.connectionDescriptors, this.messagesPublisher, sessionsStore, server.getImBusinessScheduler(), server);
 
         mServer = server;
-        m_mqttClient = mqttClient;
 
         String onlineStatusCallback = server.getConfig().getProperty(BrokerConstants.USER_ONLINE_STATUS_CALLBACK);
         if (!com.hazelcast.util.StringUtil.isNullOrEmpty(onlineStatusCallback)) {

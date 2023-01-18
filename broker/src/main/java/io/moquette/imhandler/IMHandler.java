@@ -58,7 +58,6 @@ abstract public class IMHandler<T> {
     protected static ISessionsStore m_sessionsStore = null;
     protected static Server mServer = null;
     protected static MessagesPublisher publisher;
-    protected static MqttClient m_mqttClient = null;
     private static ThreadPoolExecutorWrapper m_imBusinessExecutor;
     private static RateLimiter mLimitCounter;
     private Method parseDataMethod;
@@ -149,13 +148,12 @@ abstract public class IMHandler<T> {
         return (T)(GsonUtil.gson.fromJson(new String(bytes), dataCls));
     }
 
-    public static void init(IMessagesStore ms, ISessionsStore ss, MessagesPublisher p, ThreadPoolExecutorWrapper businessExecutor, Server server, MqttClient mqttClient) {
+    public static void init(IMessagesStore ms, ISessionsStore ss, MessagesPublisher p, ThreadPoolExecutorWrapper businessExecutor, Server server) {
         m_messagesStore = ms;
         m_sessionsStore = ss;
         publisher = p;
         m_imBusinessExecutor = businessExecutor;
         mServer = server;
-        m_mqttClient = mqttClient;
         int clientRateLimit = 100;
         try {
             clientRateLimit = Integer.parseInt(server.getConfig().getProperty(CLIENT_REQUEST_RATE_LIMIT, "100"));
@@ -266,12 +264,14 @@ abstract public class IMHandler<T> {
         Set<String> notifyReceivers = new LinkedHashSet<>();
 
         try {
+            LOG.info("Publishing message to MQTT server");
             // TODO find topic by username
             String topic = "single/1234";
             // TODO send message to emqx
             MqttMessage mqttMessage = new MqttMessage(message.toByteArray());
             mqttMessage.setQos(1);
-            m_mqttClient.publish(topic, mqttMessage);
+            mServer.getMqttClient().publish(topic, mqttMessage);
+            LOG.info("Published success");
         } catch (MqttException e) {
             LOG.error("send message to mqtt server failure", e);
         }

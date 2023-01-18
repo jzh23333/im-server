@@ -75,15 +75,14 @@ public class Qos1PublishHandler extends QosPublishHandler {
 
     public Qos1PublishHandler(IAuthorizator authorizator, IMessagesStore messagesStore, BrokerInterceptor interceptor,
                               ConnectionDescriptorStore connectionDescriptors, MessagesPublisher messagesPublisher,
-                              ISessionsStore sessionStore, ThreadPoolExecutorWrapper executorService, Server server,
-                              MqttClient mqttClient) {
+                              ISessionsStore sessionStore, ThreadPoolExecutorWrapper executorService, Server server) {
         super(authorizator);
         this.m_messagesStore = messagesStore;
         this.connectionDescriptors = connectionDescriptors;
         this.publisher = messagesPublisher;
         this.m_sessionStore = sessionStore;
         this.m_imBusinessExecutor = executorService;
-        IMHandler.init(m_messagesStore, m_sessionStore, publisher, m_imBusinessExecutor, server, mqttClient);
+        IMHandler.init(m_messagesStore, m_sessionStore, publisher, m_imBusinessExecutor, server);
         registerAllAction();
     }
 

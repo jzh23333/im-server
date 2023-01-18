@@ -101,6 +101,11 @@ public class Server {
 
     private MqttClient mqttClient;
 
+
+    public MqttClient getMqttClient() {
+        return mqttClient;
+    }
+
     private ThreadPoolExecutorWrapper dbScheduler;
     private ThreadPoolExecutorWrapper imBusinessScheduler;
     private ThreadPoolExecutorWrapper callbackScheduler;
@@ -275,13 +280,13 @@ public class Server {
         m_store = initStore(config, this);
         m_processorBootstrapper = new ProtocolProcessorBootstrapper();
 
-        mqttClient = initMqttClient(config);
+        initMqttClient(config);
 
         boolean configured = configureCluster(config);
 
         m_store.initStore();
         final ProtocolProcessor processor = m_processorBootstrapper.init(config, handlers, authenticator, authorizator,
-            this, m_store, mqttClient);
+            this, m_store);
         LOG.info("Initialized MQTT protocol processor");
         if (sslCtxCreator == null) {
             LOG.warn("Using default SSL context creator");
@@ -298,7 +303,7 @@ public class Server {
         m_initialized = configured;
     }
 
-    private MqttClient initMqttClient(IConfig config) {
+    private void initMqttClient(IConfig config) {
         String broker = String.format("%s://%s:%s",
             "tcp",
             config.getProperty(MQTT_SERVER_IP),
@@ -308,7 +313,7 @@ public class Server {
         String password = config.getProperty(MQTT_SERVER_PASSWORD);
         MemoryPersistence persistence = new MemoryPersistence();
         try {
-            MqttClient mqttClient = new MqttClient(broker, clientId, persistence);
+            mqttClient = new MqttClient(broker, clientId, persistence);
             mqttClient.setCallback(new OnMessageCallback(clientId));
 
             MqttConnectOptions options = new MqttConnectOptions();
@@ -316,14 +321,12 @@ public class Server {
             options.setPassword(password.toCharArray());
             options.setCleanSession(true);
 
-            LOG.info("Connection to emqx: " + broker);
+            LOG.info("Connection to MQTT server: " + broker);
             mqttClient.connect(options);
-            LOG.info("emqx connected.");
-            return mqttClient;
+            LOG.info("MQTT server connected.");
         } catch (MqttException e) {
             LOG.error("init mqtt client failure", e);
         }
-        return null;
     }
 
     private IStore initStore(IConfig props, Server server) {
