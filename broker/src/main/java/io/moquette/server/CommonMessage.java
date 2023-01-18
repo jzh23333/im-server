@@ -38,6 +38,14 @@ public class CommonMessage implements Serializable {
         }
     }
 
+    @Override
+    public String toString() {
+        return "CommonMessage{" +
+            "fromUser='" + fromUser + '\'' +
+            ", fromClientId='" + fromClientId + '\'' +
+            '}';
+    }
+
     public String getFromUser() {
         return fromUser;
     }
