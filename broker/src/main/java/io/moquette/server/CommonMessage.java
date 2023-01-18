@@ -5,6 +5,8 @@ import cn.wildfirechat.proto.WFCMessage;
 import java.io.*;
 
 public class CommonMessage implements Serializable {
+
+    private static final long serialVersionUID = 7375178621546868315L;
     private String fromUser;
     private String fromClientId;
     private byte[] payload;
