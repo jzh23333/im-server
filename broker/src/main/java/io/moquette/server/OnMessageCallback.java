@@ -21,7 +21,7 @@ public class OnMessageCallback implements MqttCallback {
     @Override
     public void connectionLost(Throwable throwable) {
         // 连接丢失后，一般在这里面进行重连
-        System.out.println("连接断开，可以做重连");
+        LOG.info("连接断开，可以做重连");
     }
 
     @Override
@@ -35,6 +35,6 @@ public class OnMessageCallback implements MqttCallback {
 
     @Override
     public void deliveryComplete(IMqttDeliveryToken iMqttDeliveryToken) {
-        System.out.println("deliveryComplete---------" + iMqttDeliveryToken.isComplete());
+        LOG.info("deliveryComplete---------" + iMqttDeliveryToken.isComplete());
     }
 }

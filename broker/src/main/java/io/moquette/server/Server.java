@@ -321,10 +321,13 @@ public class Server {
             options.setUserName(username);
             options.setPassword(password.toCharArray());
             options.setCleanSession(true);
+            options.setAutomaticReconnect(true);
 
             LOG.info("Connection to MQTT server: " + broker);
             mqttClient.connect(options);
             LOG.info("MQTT server connected.");
+
+            mqttClient.subscribe("single/1234");
         } catch (MqttException e) {
             LOG.error("init mqtt client failure", e);
         }
