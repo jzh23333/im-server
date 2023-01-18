@@ -20,19 +20,20 @@ import cn.wildfirechat.common.ErrorCode;
 import cn.wildfirechat.pojos.UserOnlineStatus;
 import cn.wildfirechat.proto.ProtoConstants;
 import cn.wildfirechat.proto.WFCMessage;
-import com.google.gson.Gson;
 import com.hazelcast.util.StringUtil;
 import io.moquette.BrokerConstants;
-import io.moquette.persistence.ServerAPIHelper;
 import io.moquette.interception.InterceptHandler;
 import io.moquette.interception.messages.InterceptAcknowledgedMessage;
 import io.moquette.persistence.MemorySessionStore;
+import io.moquette.persistence.ServerAPIHelper;
 import io.moquette.server.ConnectionDescriptor;
 import io.moquette.server.ConnectionDescriptorStore;
 import io.moquette.server.Server;
 import io.moquette.server.netty.NettyUtils;
-import io.moquette.spi.*;
+import io.moquette.spi.ClientSession;
+import io.moquette.spi.IMessagesStore;
 import io.moquette.spi.IMessagesStore.StoredMessage;
+import io.moquette.spi.ISessionsStore;
 import io.moquette.spi.impl.security.AES;
 import io.moquette.spi.security.IAuthenticator;
 import io.moquette.spi.security.IAuthorizator;
@@ -45,22 +46,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import win.liyufan.im.GsonUtil;
 import win.liyufan.im.HttpUtils;
-import win.liyufan.im.IMTopic;
 import win.liyufan.im.Utility;
 
-import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static cn.wildfirechat.common.ErrorCode.ERROR_CODE_SUCCESS;
-import static io.moquette.spi.impl.InternalRepublisher.createPublishForQos;
 import static cn.wildfirechat.common.IMExceptionEvent.EventType.EVENT_CALLBACK_Exception;
+import static io.moquette.server.ConnectionDescriptor.ConnectionState.*;
+import static io.moquette.spi.impl.InternalRepublisher.createPublishForQos;
 import static io.moquette.spi.impl.Utils.readBytesAndRewind;
 import static io.netty.handler.codec.mqtt.MqttConnectReturnCode.*;
 import static io.netty.handler.codec.mqtt.MqttMessageIdVariableHeader.from;
-import static io.netty.handler.codec.mqtt.MqttQoS.*;
-import static io.moquette.server.ConnectionDescriptor.ConnectionState.*;
+import static io.netty.handler.codec.mqtt.MqttQoS.AT_LEAST_ONCE;
 
 /**
  * Class responsible to handle the logic of MQTT protocol it's the director of the protocol
@@ -177,6 +178,7 @@ public class ProtocolProcessor {
         if (!com.hazelcast.util.StringUtil.isNullOrEmpty(onlineStatusCallback)) {
             mUserOnlineStatusCallback = onlineStatusCallback;
         }
+
     }
 
     private String mUserOnlineStatusCallback;
@@ -621,10 +623,8 @@ public class ProtocolProcessor {
         channel.closeFuture();
 
         //disconnect the session
-
         m_sessionsStore.sessionForClient(clientID).disconnect(session.getUsername(), isDup, isRetain);
     }
-
 
     private boolean dropStoredMessages(ConnectionDescriptor descriptor, String clientID) {
         final boolean success = descriptor.assignState(ESTABLISHED, MESSAGES_DROPPED);

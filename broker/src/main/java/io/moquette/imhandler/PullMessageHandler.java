@@ -21,15 +21,12 @@ public class PullMessageHandler extends IMHandler<WFCMessage.PullMessageRequest>
     public ErrorCode action(ByteBuf ackPayload, String clientID, String fromUser, ProtoConstants.RequestSourceType requestSourceType, WFCMessage.PullMessageRequest request, Qos1PublishHandler.IMCallback callback) {
         ErrorCode errorCode = ErrorCode.ERROR_CODE_SUCCESS;
 
-        LOG.info("pull request {}", request);
-
         if (request.getType() == ProtoConstants.PullType.Pull_ChatRoom && !m_messagesStore.checkUserClientInChatroom(fromUser, clientID, null)) {
             errorCode = ErrorCode.ERROR_CODE_NOT_IN_CHATROOM;
         } else {
             WFCMessage.PullMessageResult result = m_messagesStore.fetchMessage(fromUser, clientID, request.getId(), request.getType());
-            LOG.info("pull message: {}", result);
             byte[] data = result.toByteArray();
-            LOG.info("User {} pull message with count({}), current: {}, head: {} payload size({})", fromUser, result.getMessageCount(), result.getCurrent(), result.getHead(), data.length);
+            LOG.info("User {} pull message with count({}), payload size({})", fromUser, result.getMessageCount(), data.length);
             ackPayload.ensureWritable(data.length).writeBytes(data);
         }
         return errorCode;
