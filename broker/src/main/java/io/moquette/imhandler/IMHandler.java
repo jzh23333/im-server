@@ -22,6 +22,9 @@ import io.moquette.spi.impl.Qos1PublishHandler;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.util.internal.StringUtil;
+import org.eclipse.paho.client.mqttv3.MqttClient;
+import org.eclipse.paho.client.mqttv3.MqttException;
+import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import cn.wildfirechat.common.ErrorCode;
@@ -55,6 +58,7 @@ abstract public class IMHandler<T> {
     protected static ISessionsStore m_sessionsStore = null;
     protected static Server mServer = null;
     protected static MessagesPublisher publisher;
+    protected static MqttClient m_mqttClient = null;
     private static ThreadPoolExecutorWrapper m_imBusinessExecutor;
     private static RateLimiter mLimitCounter;
     private Method parseDataMethod;
@@ -145,12 +149,13 @@ abstract public class IMHandler<T> {
         return (T)(GsonUtil.gson.fromJson(new String(bytes), dataCls));
     }
 
-    public static void init(IMessagesStore ms, ISessionsStore ss, MessagesPublisher p, ThreadPoolExecutorWrapper businessExecutor, Server server) {
+    public static void init(IMessagesStore ms, ISessionsStore ss, MessagesPublisher p, ThreadPoolExecutorWrapper businessExecutor, Server server, MqttClient mqttClient) {
         m_messagesStore = ms;
         m_sessionsStore = ss;
         publisher = p;
         m_imBusinessExecutor = businessExecutor;
         mServer = server;
+        m_mqttClient = mqttClient;
         int clientRateLimit = 100;
         try {
             clientRateLimit = Integer.parseInt(server.getConfig().getProperty(CLIENT_REQUEST_RATE_LIMIT, "100"));
@@ -259,6 +264,17 @@ abstract public class IMHandler<T> {
 
     protected long saveAndPublish(String username, String clientID, WFCMessage.Message message, ProtoConstants.RequestSourceType requestSourceType) {
         Set<String> notifyReceivers = new LinkedHashSet<>();
+
+        try {
+            // TODO find topic by username
+            String topic = "single/1234";
+            // TODO send message to emqx
+            MqttMessage mqttMessage = new MqttMessage(message.toByteArray());
+            mqttMessage.setQos(1);
+            m_mqttClient.publish(topic, mqttMessage);
+        } catch (MqttException e) {
+            LOG.error("send message to mqtt server failure", e);
+        }
 
         message = m_messagesStore.storeMessage(username, clientID, message);
         WFCMessage.Message.Builder messageBuilder = message.toBuilder();

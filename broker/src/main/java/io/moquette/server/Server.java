@@ -275,11 +275,13 @@ public class Server {
         m_store = initStore(config, this);
         m_processorBootstrapper = new ProtocolProcessorBootstrapper();
 
+        mqttClient = initMqttClient(config);
+
         boolean configured = configureCluster(config);
 
         m_store.initStore();
         final ProtocolProcessor processor = m_processorBootstrapper.init(config, handlers, authenticator, authorizator,
-            this, m_store);
+            this, m_store, mqttClient);
         LOG.info("Initialized MQTT protocol processor");
         if (sslCtxCreator == null) {
             LOG.warn("Using default SSL context creator");
@@ -292,13 +294,11 @@ public class Server {
         m_acceptor = new NettyAcceptor();
         m_acceptor.initialize(processor, config, sslCtxCreator);
 
-        initMqttClient(config);
-
         LOG.info("Moquette server has been initialized successfully");
         m_initialized = configured;
     }
 
-    private void initMqttClient(IConfig config) {
+    private MqttClient initMqttClient(IConfig config) {
         String broker = String.format("%s://%s:%s",
             "tcp",
             config.getProperty(MQTT_SERVER_IP),
@@ -308,7 +308,7 @@ public class Server {
         String password = config.getProperty(MQTT_SERVER_PASSWORD);
         MemoryPersistence persistence = new MemoryPersistence();
         try {
-            mqttClient = new MqttClient(broker, clientId, persistence);
+            MqttClient mqttClient = new MqttClient(broker, clientId, persistence);
             mqttClient.setCallback(new OnMessageCallback(clientId));
 
             MqttConnectOptions options = new MqttConnectOptions();
@@ -319,9 +319,11 @@ public class Server {
             LOG.info("Connection to emqx: " + broker);
             mqttClient.connect(options);
             LOG.info("emqx connected.");
+            return mqttClient;
         } catch (MqttException e) {
             LOG.error("init mqtt client failure", e);
         }
+        return null;
     }
 
     private IStore initStore(IConfig props, Server server) {
@@ -501,8 +503,9 @@ public class Server {
 
     private void disconnectMqttClient() {
         try {
+            LOG.trace("Disconnecting MQTT client");
             mqttClient.disconnect();
-            LOG.info("emqx disconnected.");
+            LOG.info("MQTT client disconnected.");
             mqttClient.close();
         } catch (MqttException me) {
             LOG.error("disconnect mqtt client failure", me);

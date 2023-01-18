@@ -20,6 +20,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,7 +75,8 @@ public class ProtocolProcessorBootstrapper {
      * @return the processor created for the broker.
      */
     public ProtocolProcessor init(IConfig props, List<? extends InterceptHandler> embeddedObservers,
-            IAuthenticator authenticator, IAuthorizator authorizator, Server server, IStore store) {
+            IAuthenticator authenticator, IAuthorizator authorizator, Server server, IStore store,
+                                  MqttClient mqttClient) {
         IMessagesStore messagesStore;
         messagesStore = store.messagesStore();
         m_sessionsStore = store.sessionsStore();
@@ -116,7 +118,8 @@ public class ProtocolProcessorBootstrapper {
         connectionDescriptors = new ConnectionDescriptorStore(m_sessionsStore);
 
         LOG.info("Initializing MQTT protocol processor...");
-        m_processor.init(connectionDescriptors, messagesStore, m_sessionsStore, authenticator, authorizator, interceptor, server);
+        m_processor.init(connectionDescriptors, messagesStore, m_sessionsStore, authenticator, authorizator,
+            interceptor, server, mqttClient);
         return m_processor;
     }
 
