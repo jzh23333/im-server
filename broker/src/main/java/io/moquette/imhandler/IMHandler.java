@@ -263,6 +263,8 @@ abstract public class IMHandler<T> {
     protected long saveAndPublish(String username, String clientID, WFCMessage.Message message, ProtoConstants.RequestSourceType requestSourceType) {
         Set<String> notifyReceivers = new LinkedHashSet<>();
 
+        message = m_messagesStore.storeMessage(username, clientID, message);
+
         try {
             LOG.info("Publishing message to MQTT server");
             // TODO find topic by username
@@ -276,7 +278,7 @@ abstract public class IMHandler<T> {
             LOG.error("send message to mqtt server failure", e);
         }
 
-        message = m_messagesStore.storeMessage(username, clientID, message);
+
         WFCMessage.Message.Builder messageBuilder = message.toBuilder();
         int pullType = m_messagesStore.getNotifyReceivers(username, messageBuilder, notifyReceivers, requestSourceType);
         mServer.getImBusinessScheduler().execute(() -> this.publisher.publish2Receivers(messageBuilder.build(), notifyReceivers, clientID, pullType));

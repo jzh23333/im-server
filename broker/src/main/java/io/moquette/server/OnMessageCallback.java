@@ -1,13 +1,21 @@
 package io.moquette.server;
 
+import cn.wildfirechat.proto.WFCMessage;
+import io.moquette.spi.impl.MessagesPublisher;
+import io.moquette.spi.impl.Qos1PublishHandler;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class OnMessageCallback implements MqttCallback {
+    private static final Logger LOG = LoggerFactory.getLogger(OnMessageCallback.class);
     private String clientId;
-    public OnMessageCallback(String clientId) {
+    private MessagesPublisher publisher;
+    public OnMessageCallback(String clientId, MessagesPublisher publisher) {
         this.clientId = clientId;
+        this.publisher = publisher;
     }
 
     @Override
@@ -19,9 +27,10 @@ public class OnMessageCallback implements MqttCallback {
     @Override
     public void messageArrived(String s, MqttMessage mqttMessage) throws Exception {
         // subscribe后得到的消息会执行到这里面
-        System.out.println("接收消息主题:" + s);
-        System.out.println("接收消息Qos:" + mqttMessage.getQos());
-        System.out.println("接收消息内容:" + new String(mqttMessage.getPayload()));
+        LOG.info("接收消息主题:" + s);
+        LOG.info("接收消息Qos:" + mqttMessage.getQos());
+        WFCMessage.Message message = WFCMessage.Message.parseFrom(mqttMessage.getPayload());
+        LOG.info("接收消息内容:" + message);
     }
 
     @Override

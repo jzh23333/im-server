@@ -35,6 +35,7 @@ import io.moquette.interception.*;
 import io.moquette.server.config.*;
 import io.moquette.server.netty.NettyAcceptor;
 import io.moquette.spi.IStore;
+import io.moquette.spi.impl.MessagesPublisher;
 import io.moquette.spi.impl.ProtocolProcessor;
 import io.moquette.spi.impl.ProtocolProcessorBootstrapper;
 import io.moquette.spi.impl.security.AES;
@@ -280,8 +281,6 @@ public class Server {
         m_store = initStore(config, this);
         m_processorBootstrapper = new ProtocolProcessorBootstrapper();
 
-        initMqttClient(config);
-
         boolean configured = configureCluster(config);
 
         m_store.initStore();
@@ -299,11 +298,13 @@ public class Server {
         m_acceptor = new NettyAcceptor();
         m_acceptor.initialize(processor, config, sslCtxCreator);
 
+        initMqttClient(config, processor.messagesPublisher);
+
         LOG.info("Moquette server has been initialized successfully");
         m_initialized = configured;
     }
 
-    private void initMqttClient(IConfig config) {
+    private void initMqttClient(IConfig config, MessagesPublisher publisher) {
         String broker = String.format("%s://%s:%s",
             "tcp",
             config.getProperty(MQTT_SERVER_IP),
@@ -314,7 +315,7 @@ public class Server {
         MemoryPersistence persistence = new MemoryPersistence();
         try {
             mqttClient = new MqttClient(broker, clientId, persistence);
-            mqttClient.setCallback(new OnMessageCallback(clientId));
+            mqttClient.setCallback(new OnMessageCallback(clientId, publisher));
 
             MqttConnectOptions options = new MqttConnectOptions();
             options.setUserName(username);

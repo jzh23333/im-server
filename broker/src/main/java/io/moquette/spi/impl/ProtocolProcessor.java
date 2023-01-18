@@ -134,7 +134,7 @@ public class ProtocolProcessor {
     private BrokerInterceptor m_interceptor;
 
     public Qos1PublishHandler qos1PublishHandler;
-    private MessagesPublisher messagesPublisher;
+    public MessagesPublisher messagesPublisher;
 
     private Server mServer;
 
