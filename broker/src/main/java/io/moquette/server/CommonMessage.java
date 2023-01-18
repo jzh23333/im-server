@@ -1,10 +1,10 @@
 package io.moquette.server;
 
-import com.google.protobuf.CodedOutputStream;
+import cn.wildfirechat.proto.WFCMessage;
 
 import java.io.*;
 
-public class CommonMessage {
+public class CommonMessage implements Serializable {
     private String fromUser;
     private String fromClientId;
     private byte[] payload;
