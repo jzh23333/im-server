@@ -42,14 +42,11 @@ public class OnMessageCallback implements MqttCallback {
     @Override
     public void messageArrived(String s, MqttMessage mqttMessage) {
         // subscribe后得到的消息会执行到这里面
-        LOG.info("接收消息主题:" + s);
-        LOG.info("接收消息Qos:" + mqttMessage.getQos());
-
+        LOG.info("Received message: topic: {}, qos: {}", s, mqttMessage.getQos());
         try {
             CommonMessage commonMessage = CommonMessage.bytesToObject(mqttMessage.getPayload());
-            LOG.info("接收消息内容:" + commonMessage);
             WFCMessage.Message message = WFCMessage.Message.parseFrom(commonMessage.getPayload());
-            LOG.info("接收消息:" + message);
+            saveAndPublish(commonMessage.getFromClientId(), message);
         } catch (Exception e) {
             LOG.error("resolve message failure", e);
         }

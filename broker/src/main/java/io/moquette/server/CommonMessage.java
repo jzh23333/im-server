@@ -9,6 +9,7 @@ public class CommonMessage implements Serializable {
     private static final long serialVersionUID = 7375178621546868315L;
     private String fromUser;
     private String fromClientId;
+    private String serverClientId;
     private byte[] payload;
 
     /**
@@ -43,6 +44,7 @@ public class CommonMessage implements Serializable {
         return "CommonMessage{" +
             "fromUser='" + fromUser + '\'' +
             ", fromClientId='" + fromClientId + '\'' +
+            ", serverClientId='" + serverClientId + '\'' +
             '}';
     }
 
@@ -60,6 +62,14 @@ public class CommonMessage implements Serializable {
 
     public void setFromClientId(String fromClientId) {
         this.fromClientId = fromClientId;
+    }
+
+    public String getServerClientId() {
+        return serverClientId;
+    }
+
+    public void setServerClientId(String serverClientId) {
+        this.serverClientId = serverClientId;
     }
 
     public byte[] getPayload() {

@@ -275,6 +275,7 @@ abstract public class IMHandler<T> {
             commonMessage.setPayload(message.toByteArray());
             commonMessage.setFromUser(username);
             commonMessage.setFromClientId(clientID);
+            commonMessage.setServerClientId(mServer.getMqttClient().getClientId());
             MqttMessage mqttMessage = new MqttMessage(commonMessage.toByteArray());
             mqttMessage.setQos(1);
             mServer.getMqttClient().publish(topic, mqttMessage);
