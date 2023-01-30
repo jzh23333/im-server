@@ -11,7 +11,7 @@ public class CommonMessage implements Serializable {
     private String fromUser;
     private String fromClientId;
     private String serverClientId;
-    private ProtoConstants.RequestSourceType requestSourceType;
+    private String requestSourceType;
     private byte[] payload;
 
     /**
@@ -75,11 +75,11 @@ public class CommonMessage implements Serializable {
         this.serverClientId = serverClientId;
     }
 
-    public ProtoConstants.RequestSourceType getRequestSourceType() {
+    public String getRequestSourceType() {
         return requestSourceType;
     }
 
-    public void setRequestSourceType(ProtoConstants.RequestSourceType requestSourceType) {
+    public void setRequestSourceType(String requestSourceType) {
         this.requestSourceType = requestSourceType;
     }
 

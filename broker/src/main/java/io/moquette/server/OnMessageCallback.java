@@ -6,18 +6,16 @@ import io.moquette.spi.IMessagesStore;
 import io.moquette.spi.ISessionsStore;
 import io.moquette.spi.IStore;
 import io.moquette.spi.impl.MessagesPublisher;
-import io.moquette.spi.impl.Qos1PublishHandler;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
-import org.fusesource.mqtt.client.MQTTException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import static cn.wildfirechat.proto.ProtoConstants.RequestSourceType.Request_From_User;
+import static cn.wildfirechat.proto.ProtoConstants.RequestSourceType.*;
 
 public class OnMessageCallback implements MqttCallback {
     private static final Logger LOG = LoggerFactory.getLogger(OnMessageCallback.class);
@@ -36,20 +34,32 @@ public class OnMessageCallback implements MqttCallback {
 
     @Override
     public void connectionLost(Throwable throwable) {
-        // 连接丢失后，一般在这里面进行重连
         LOG.debug("连接断开，可以做重连");
     }
 
     @Override
     public void messageArrived(String s, MqttMessage mqttMessage) {
-        // subscribe后得到的消息会执行到这里面
         LOG.info("Received message: topic: {}, qos: {}", s, mqttMessage.getQos());
         try {
             CommonMessage commonMessage = CommonMessage.bytesToObject(mqttMessage.getPayload());
             WFCMessage.Message message = WFCMessage.Message.parseFrom(commonMessage.getPayload());
-            publish(commonMessage.getFromClientId(), message, commonMessage.getRequestSourceType());
+            ProtoConstants.RequestSourceType requestSourceType = getRequestSourceType(commonMessage.getRequestSourceType());
+            publish(commonMessage.getFromClientId(), message, requestSourceType);
         } catch (Exception e) {
             LOG.error("resolve message failure", e);
+        }
+    }
+
+    private ProtoConstants.RequestSourceType getRequestSourceType(String name) {
+        switch (name) {
+            case "Request_From_Admin":
+                return Request_From_Admin;
+            case "Request_From_Robot":
+                return Request_From_Robot;
+            case "Request_From_Channel":
+                return Request_From_Channel;
+            default:
+                return Request_From_User;
         }
     }
 

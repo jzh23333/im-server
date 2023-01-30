@@ -8,10 +8,10 @@
 
 package io.moquette.imhandler;
 
+import cn.wildfirechat.common.ErrorCode;
 import cn.wildfirechat.proto.ProtoConstants;
 import cn.wildfirechat.proto.WFCMessage;
 import cn.wildfirechat.server.ThreadPoolExecutorWrapper;
-import com.google.gson.Gson;
 import com.google.protobuf.GeneratedMessage;
 import com.google.protobuf.InvalidProtocolBufferException;
 import io.moquette.server.CommonMessage;
@@ -23,12 +23,10 @@ import io.moquette.spi.impl.Qos1PublishHandler;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.util.internal.StringUtil;
-import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import cn.wildfirechat.common.ErrorCode;
 import win.liyufan.im.GsonUtil;
 import win.liyufan.im.RateLimiter;
 import win.liyufan.im.Utility;
@@ -41,7 +39,6 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.*;
 
-import static cn.wildfirechat.common.ErrorCode.ERROR_CODE_OVER_FREQUENCY;
 import static cn.wildfirechat.common.ErrorCode.ERROR_CODE_SUCCESS;
 import static io.moquette.BrokerConstants.CLIENT_REQUEST_RATE_LIMIT;
 import static win.liyufan.im.IMTopic.GetUserSettingTopic;
@@ -283,7 +280,7 @@ abstract public class IMHandler<T> {
             commonMessage.setFromUser(username);
             commonMessage.setFromClientId(clientID);
             commonMessage.setServerClientId(mServer.getMqttClient().getClientId());
-            commonMessage.setRequestSourceType(requestSourceType);
+            commonMessage.setRequestSourceType(requestSourceType.name());
             MqttMessage mqttMessage = new MqttMessage(commonMessage.toByteArray());
             mqttMessage.setQos(1);
             mServer.getMqttClient().publish(topic, mqttMessage);
