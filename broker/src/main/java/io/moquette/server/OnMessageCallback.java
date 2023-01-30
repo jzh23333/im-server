@@ -15,8 +15,6 @@ import org.slf4j.LoggerFactory;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import static cn.wildfirechat.proto.ProtoConstants.RequestSourceType.*;
-
 public class OnMessageCallback implements MqttCallback {
     private static final Logger LOG = LoggerFactory.getLogger(OnMessageCallback.class);
     private String clientId;
@@ -42,24 +40,11 @@ public class OnMessageCallback implements MqttCallback {
         LOG.info("Received message: topic: {}, qos: {}", s, mqttMessage.getQos());
         try {
             CommonMessage commonMessage = CommonMessage.bytesToObject(mqttMessage.getPayload());
+            LOG.info("Received message: {}", commonMessage);
             WFCMessage.Message message = WFCMessage.Message.parseFrom(commonMessage.getPayload());
-            ProtoConstants.RequestSourceType requestSourceType = getRequestSourceType(commonMessage.getRequestSourceType());
-            publish(commonMessage.getFromClientId(), message, requestSourceType);
+            publish(commonMessage.getFromClientId(), message, commonMessage.getRequestSourceType());
         } catch (Exception e) {
             LOG.error("resolve message failure", e);
-        }
-    }
-
-    private ProtoConstants.RequestSourceType getRequestSourceType(String name) {
-        switch (name) {
-            case "Request_From_Admin":
-                return Request_From_Admin;
-            case "Request_From_Robot":
-                return Request_From_Robot;
-            case "Request_From_Channel":
-                return Request_From_Channel;
-            default:
-                return Request_From_User;
         }
     }
 

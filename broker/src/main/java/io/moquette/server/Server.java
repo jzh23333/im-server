@@ -329,7 +329,9 @@ public class Server {
             mqttClient.connect(options);
             LOG.info("MQTT server connected.");
 
-            mqttClient.subscribe("single/1234");
+            mqttClient.subscribe("wildfirechat/message");
+//            mqttClient.subscribe("wildfirechat/boardcast");
+//            mqttClient.subscribe("wildfirechat/multicast");
         } catch (MqttException e) {
             LOG.error("init mqtt client failure", e);
         }

@@ -1,7 +1,6 @@
 package io.moquette.server;
 
 import cn.wildfirechat.proto.ProtoConstants;
-import cn.wildfirechat.proto.WFCMessage;
 
 import java.io.*;
 
@@ -11,7 +10,7 @@ public class CommonMessage implements Serializable {
     private String fromUser;
     private String fromClientId;
     private String serverClientId;
-    private String requestSourceType;
+    private ProtoConstants.RequestSourceType requestSourceType;
     private byte[] payload;
 
     /**
@@ -75,11 +74,11 @@ public class CommonMessage implements Serializable {
         this.serverClientId = serverClientId;
     }
 
-    public String getRequestSourceType() {
+    public ProtoConstants.RequestSourceType getRequestSourceType() {
         return requestSourceType;
     }
 
-    public void setRequestSourceType(String requestSourceType) {
+    public void setRequestSourceType(ProtoConstants.RequestSourceType requestSourceType) {
         this.requestSourceType = requestSourceType;
     }
 

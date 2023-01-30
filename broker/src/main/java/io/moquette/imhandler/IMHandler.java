@@ -37,7 +37,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import static cn.wildfirechat.common.ErrorCode.ERROR_CODE_SUCCESS;
 import static io.moquette.BrokerConstants.CLIENT_REQUEST_RATE_LIMIT;
@@ -250,12 +253,14 @@ abstract public class IMHandler<T> {
 
     }
     protected long publish(String username, String clientID, WFCMessage.Message message, ProtoConstants.RequestSourceType requestSourceType) {
-        Set<String> notifyReceivers = new LinkedHashSet<>();
-
-        WFCMessage.Message.Builder messageBuilder = message.toBuilder();
-        int pullType = m_messagesStore.getNotifyReceivers(username, messageBuilder, notifyReceivers, requestSourceType);
-        mServer.getImBusinessScheduler().execute(() -> this.publisher.publish2Receivers(messageBuilder.build(), notifyReceivers, clientID, pullType));
-        return notifyReceivers.size();
+//        Set<String> notifyReceivers = new LinkedHashSet<>();
+//
+//        WFCMessage.Message.Builder messageBuilder = message.toBuilder();
+//        int pullType = m_messagesStore.getNotifyReceivers(username, messageBuilder, notifyReceivers, requestSourceType);
+//        mServer.getImBusinessScheduler().execute(() -> this.publisher.publish2Receivers(messageBuilder.build(), notifyReceivers, clientID, pullType));
+//        return notifyReceivers.size();
+        asyncPublish(username, clientID, message, requestSourceType);
+        return 0;
     }
 
     protected long saveAndPublish(String username, String clientID, WFCMessage.Message message, ProtoConstants.RequestSourceType requestSourceType) {
@@ -273,22 +278,28 @@ abstract public class IMHandler<T> {
 
     protected void asyncPublish(String username, String clientID, WFCMessage.Message message, ProtoConstants.RequestSourceType requestSourceType) {
         try {
-            LOG.info("Publishing message to MQTT server");
-            String topic = "wildfirechat";
+            String topic = "wildfirechat/message";
             CommonMessage commonMessage = new CommonMessage();
             commonMessage.setPayload(message.toByteArray());
             commonMessage.setFromUser(username);
             commonMessage.setFromClientId(clientID);
             commonMessage.setServerClientId(mServer.getMqttClient().getClientId());
-            commonMessage.setRequestSourceType(requestSourceType.name());
-            MqttMessage mqttMessage = new MqttMessage(commonMessage.toByteArray());
+            commonMessage.setRequestSourceType(requestSourceType);
+            sendMQTTMessage(topic, commonMessage.toByteArray());
+        } catch (Exception e) {
+            LOG.error("serialize common message failure", e);
+        }
+    }
+
+    private void sendMQTTMessage(String topic, byte[] msgByte) {
+        try {
+            LOG.info("Publishing message to MQTT server");
+            MqttMessage mqttMessage = new MqttMessage(msgByte);
             mqttMessage.setQos(1);
             mServer.getMqttClient().publish(topic, mqttMessage);
             LOG.info("Published success");
         } catch (MqttException e) {
             LOG.error("send message to mqtt server failure", e);
-        } catch (Exception e) {
-            LOG.error("serialize common message failure", e);
         }
     }
 
