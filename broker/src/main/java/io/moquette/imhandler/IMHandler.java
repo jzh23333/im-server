@@ -262,20 +262,28 @@ abstract public class IMHandler<T> {
     }
 
     protected long saveAndPublish(String username, String clientID, WFCMessage.Message message, ProtoConstants.RequestSourceType requestSourceType) {
-        Set<String> notifyReceivers = new LinkedHashSet<>();
-
+//        Set<String> notifyReceivers = new LinkedHashSet<>();
+//
         message = m_messagesStore.storeMessage(username, clientID, message);
 
+//        WFCMessage.Message.Builder messageBuilder = message.toBuilder();
+//        int pullType = m_messagesStore.getNotifyReceivers(username, messageBuilder, notifyReceivers, requestSourceType);
+//        mServer.getImBusinessScheduler().execute(() -> this.publisher.publish2Receivers(messageBuilder.build(), notifyReceivers, clientID, pullType));
+//        return notifyReceivers.size();
+        asyncPublish(username, clientID, message, requestSourceType);
+        return 0;
+    }
+
+    protected void asyncPublish(String username, String clientID, WFCMessage.Message message, ProtoConstants.RequestSourceType requestSourceType) {
         try {
             LOG.info("Publishing message to MQTT server");
-            // TODO find topic by username
-            String topic = "single/1234";
-            // TODO send message to emqx
+            String topic = "wildfirechat";
             CommonMessage commonMessage = new CommonMessage();
             commonMessage.setPayload(message.toByteArray());
             commonMessage.setFromUser(username);
             commonMessage.setFromClientId(clientID);
             commonMessage.setServerClientId(mServer.getMqttClient().getClientId());
+            commonMessage.setRequestSourceType(requestSourceType);
             MqttMessage mqttMessage = new MqttMessage(commonMessage.toByteArray());
             mqttMessage.setQos(1);
             mServer.getMqttClient().publish(topic, mqttMessage);
@@ -285,11 +293,6 @@ abstract public class IMHandler<T> {
         } catch (Exception e) {
             LOG.error("serialize common message failure", e);
         }
-//        WFCMessage.Message.Builder messageBuilder = message.toBuilder();
-//        int pullType = m_messagesStore.getNotifyReceivers(username, messageBuilder, notifyReceivers, requestSourceType);
-//        mServer.getImBusinessScheduler().execute(() -> this.publisher.publish2Receivers(messageBuilder.build(), notifyReceivers, clientID, pullType));
-//        return notifyReceivers.size();
-        return 0;
     }
 
     protected long saveAndBroadcast(String username, String clientID, WFCMessage.Message message) {

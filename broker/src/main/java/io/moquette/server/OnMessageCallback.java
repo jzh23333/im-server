@@ -1,5 +1,6 @@
 package io.moquette.server;
 
+import cn.wildfirechat.proto.ProtoConstants;
 import cn.wildfirechat.proto.WFCMessage;
 import io.moquette.spi.IMessagesStore;
 import io.moquette.spi.ISessionsStore;
@@ -36,7 +37,7 @@ public class OnMessageCallback implements MqttCallback {
     @Override
     public void connectionLost(Throwable throwable) {
         // 连接丢失后，一般在这里面进行重连
-        LOG.info("连接断开，可以做重连");
+        LOG.debug("连接断开，可以做重连");
     }
 
     @Override
@@ -46,22 +47,23 @@ public class OnMessageCallback implements MqttCallback {
         try {
             CommonMessage commonMessage = CommonMessage.bytesToObject(mqttMessage.getPayload());
             WFCMessage.Message message = WFCMessage.Message.parseFrom(commonMessage.getPayload());
-            saveAndPublish(commonMessage.getFromClientId(), message);
+            publish(commonMessage.getFromClientId(), message, commonMessage.getRequestSourceType());
         } catch (Exception e) {
             LOG.error("resolve message failure", e);
         }
     }
 
-    private long saveAndPublish(String clientId, WFCMessage.Message message) {
+    private long publish(String clientId, WFCMessage.Message message, ProtoConstants.RequestSourceType requestSourceType) {
         Set<String> notifyReceivers = new LinkedHashSet<>();
+
         WFCMessage.Message.Builder messageBuilder = message.toBuilder();
-        int pullType = messagesStore.getNotifyReceivers(message.getFromUser(), messageBuilder, notifyReceivers, Request_From_User);
+        int pullType = messagesStore.getNotifyReceivers(message.getFromUser(), messageBuilder, notifyReceivers, requestSourceType);
         mServer.getImBusinessScheduler().execute(() -> this.publisher.publish2Receivers(messageBuilder.build(), notifyReceivers, clientId, pullType));
         return notifyReceivers.size();
     }
 
     @Override
     public void deliveryComplete(IMqttDeliveryToken iMqttDeliveryToken) {
-        LOG.info("deliveryComplete---------" + iMqttDeliveryToken.isComplete());
+        LOG.debug("deliveryComplete---------" + iMqttDeliveryToken.isComplete());
     }
 }
