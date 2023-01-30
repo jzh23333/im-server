@@ -40,4 +40,11 @@ public abstract class IConfig {
 
     public abstract IResourceLoader getResourceLoader();
 
+    public int intProp(String propertyName, int defaultValue) {
+        String propertyValue = getProperty(propertyName);
+        if (propertyValue == null) {
+            return defaultValue;
+        }
+        return Integer.parseInt(propertyValue);
+    }
 }

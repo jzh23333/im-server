@@ -54,10 +54,38 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import static io.moquette.BrokerConstants.*;
+import static io.moquette.BrokerConstants.WEB_SOCKET_PORT_PROPERTY_NAME;
 import static io.netty.channel.ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE;
 
 public class NettyAcceptor implements ServerAcceptor {
+    public static final String MQTT_SUBPROTOCOL_CSV_LIST = "mqtt, mqttv3.1, mqttv3.1.1";
 
+    static class WebSocketFrameToByteBufDecoder extends MessageToMessageDecoder<BinaryWebSocketFrame> {
+
+        @Override
+        protected void decode(ChannelHandlerContext chc, BinaryWebSocketFrame frame, List<Object> out)
+            throws Exception {
+            // convert the frame to a ByteBuf
+            ByteBuf bb = frame.content();
+            // System.out.println("WebSocketFrameToByteBufDecoder decode - " +
+            // ByteBufUtil.hexDump(bb));
+            bb.retain();
+            out.add(bb);
+        }
+    }
+
+    static class ByteBufToWebSocketFrameEncoder extends MessageToMessageEncoder<ByteBuf> {
+
+        @Override
+        protected void encode(ChannelHandlerContext chc, ByteBuf bb, List<Object> out) throws Exception {
+            // convert the ByteBuf to a WebSocketFrame
+            BinaryWebSocketFrame result = new BinaryWebSocketFrame();
+            // System.out.println("ByteBufToWebSocketFrameEncoder encode - " +
+            // ByteBufUtil.hexDump(bb));
+            result.content().writeBytes(bb);
+            out.add(result);
+        }
+    }
     abstract class PipelineInitializer {
 
         abstract void init(ChannelPipeline pipeline) throws Exception;
@@ -97,14 +125,13 @@ public class NettyAcceptor implements ServerAcceptor {
 
         boolean epoll = Boolean.parseBoolean(props.getProperty(BrokerConstants.NETTY_EPOLL_PROPERTY_NAME, "false"));
         if (epoll) {
-            // 由于目前只支持TCP MQTT， 所以bossGroup的线程数配置为1
             LOG.info("Netty is using Epoll");
-            m_bossGroup = new EpollEventLoopGroup(1);
+            m_bossGroup = new EpollEventLoopGroup();
             m_workerGroup = new EpollEventLoopGroup();
             channelClass = EpollServerSocketChannel.class;
         } else {
             LOG.info("Netty is using NIO");
-            m_bossGroup = new NioEventLoopGroup(1);
+            m_bossGroup = new NioEventLoopGroup();
             m_workerGroup = new NioEventLoopGroup();
             channelClass = NioServerSocketChannel.class;
         }
@@ -116,6 +143,7 @@ public class NettyAcceptor implements ServerAcceptor {
         this.errorsCather = Optional.empty();
 
         initializePlainTCPTransport(mqttHandler, props);
+        initializeWebSocketTransport(mqttHandler, props);
     }
 
     private void initFactory(String host, int port, String protocol, final PipelineInitializer pipeliner) {
@@ -186,6 +214,45 @@ public class NettyAcceptor implements ServerAcceptor {
                 if (metrics.isPresent()) {
                     pipeline.addLast("wizardMetrics", metrics.get());
                 }
+                pipeline.addLast("handler", handler);
+            }
+        });
+    }
+
+
+    private void initializeWebSocketTransport(final NettyMQTTHandler handler, IConfig props) throws IOException {
+        LOG.info("Configuring Websocket MQTT transport");
+        String webSocketPortProp = props.getProperty(WEB_SOCKET_PORT_PROPERTY_NAME, DISABLED_PORT_BIND);
+        if (DISABLED_PORT_BIND.equals(webSocketPortProp)) {
+            // Do nothing no WebSocket configured
+            LOG.info("Property {} has been setted to {}. Websocket MQTT will be disabled",
+                BrokerConstants.WEB_SOCKET_PORT_PROPERTY_NAME, DISABLED_PORT_BIND);
+            return;
+        }
+        int port = Integer.parseInt(webSocketPortProp);
+
+        final MoquetteIdleTimeoutHandler timeoutHandler = new MoquetteIdleTimeoutHandler();
+
+        String host = props.getProperty(BrokerConstants.HOST_PROPERTY_NAME);
+        String path = props.getProperty(BrokerConstants.WEB_SOCKET_PATH_PROPERTY_NAME, BrokerConstants.WEBSOCKET_PATH);
+        int maxFrameSize = props.intProp(BrokerConstants.WEB_SOCKET_MAX_FRAME_SIZE_PROPERTY_NAME, 65536);
+        initFactory(host, port, "Websocket MQTT", new PipelineInitializer() {
+
+            @Override
+            void init(ChannelPipeline pipeline) {
+                pipeline.addLast(new HttpServerCodec());
+                pipeline.addLast("aggregator", new HttpObjectAggregator(65536));
+                pipeline.addLast("webSocketHandler",
+                    new WebSocketServerProtocolHandler(path, MQTT_SUBPROTOCOL_CSV_LIST, false, maxFrameSize));
+                pipeline.addLast("ws2bytebufDecoder", new WebSocketFrameToByteBufDecoder());
+                pipeline.addLast("bytebuf2wsEncoder", new ByteBufToWebSocketFrameEncoder());
+                pipeline.addFirst("idleStateHandler", new IdleStateHandler(nettyChannelTimeoutSeconds, 0, 0));
+                pipeline.addAfter("idleStateHandler", "idleEventHandler", timeoutHandler);
+                pipeline.addFirst("bytemetrics", new BytesMetricsHandler(m_bytesMetricsCollector));
+                pipeline.addLast("decoder", new MqttDecoder());
+                pipeline.addLast("encoder", MqttEncoder.INSTANCE);
+                pipeline.addLast("metrics", new MessageMetricsHandler(m_metricsCollector));
+                pipeline.addLast("messageLogger", new MQTTMessageLogger());
                 pipeline.addLast("handler", handler);
             }
         });

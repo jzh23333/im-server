@@ -25,6 +25,9 @@ public final class BrokerConstants {
     public static final String PERSISTENT_STORE_PROPERTY_NAME = "persistent_store";
     public static final String SERVER_IP_PROPERTY_NAME = "server.ip";
     public static final String PORT_PROPERTY_NAME = "port";
+    public static final String WEB_SOCKET_PORT_PROPERTY_NAME = "websocket_port";
+    public static final String WEB_SOCKET_PATH_PROPERTY_NAME = "websocket_path";
+    public static final String WEB_SOCKET_MAX_FRAME_SIZE_PROPERTY_NAME = "websocket_max_frame_size";
     public static final String HOST_PROPERTY_NAME = "host";
     public static final String HTTP_SERVER_PORT = "http_port";
     public static final String HTTP_LOCAL_PORT = "local_port";
@@ -51,6 +54,8 @@ public final class BrokerConstants {
     public static final String DB_AUTHENTICATOR_QUERY = "authenticator.db.query";
     public static final String DB_AUTHENTICATOR_DIGEST = "authenticator.db.digest";
     public static final int PORT = 1883;
+    public static final int WEBSOCKET_PORT = 2883;
+    public static final String WEBSOCKET_PATH = "/mqtt";
     public static final String DISABLED_PORT_BIND = "disabled";
     public static final String HOST = "0.0.0.0";
     public static final String NEED_CLIENT_AUTH = "need_client_auth";
