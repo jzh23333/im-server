@@ -38,6 +38,7 @@ import io.moquette.spi.impl.subscriptions.Topic;
 import io.netty.handler.codec.mqtt.MqttVersion;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import win.liyufan.im.*;
@@ -2055,6 +2056,44 @@ public class MemoryMessagesStore implements IMessagesStore {
     }
 
     @Override
+    public ErrorCode silentGroupMember(String operator, String groupId, int type, List<String> userList, boolean isAdmin) {
+        HazelcastInstance hzInstance = m_Server.getHazelcastInstance();
+        IMap<String, WFCMessage.GroupInfo> mIMap = hzInstance.getMap(GROUPS_MAP);
+
+
+        WFCMessage.GroupInfo groupInfo = mIMap.get(groupId);
+
+        if (groupInfo == null) {
+            return ErrorCode.ERROR_CODE_NOT_EXIST;
+        }
+
+        if (!isAdmin && (groupInfo.getType() == ProtoConstants.GroupType.GroupType_Restricted || groupInfo.getType() == ProtoConstants.GroupType.GroupType_Normal)
+            && (groupInfo.getOwner() == null || !groupInfo.getOwner().equals(operator))) {
+            return ErrorCode.ERROR_CODE_NOT_RIGHT;
+        }
+
+        long updateDt = System.currentTimeMillis();
+        MultiMap<String, WFCMessage.GroupMember> groupMembers = hzInstance.getMultiMap(GROUP_MEMBERS);
+        Collection<WFCMessage.GroupMember> members = groupMembers.get(groupId);
+        if (members == null || members.size() == 0) {
+            members = loadGroupMemberFromDB(hzInstance, groupId);
+        }
+        for (WFCMessage.GroupMember member : members) {
+            if (userList.contains(member.getMemberId())) {
+                groupMembers.remove(groupId, member);
+                member = member.toBuilder().setType(type == 0 ? ProtoConstants.GroupMemberType.GroupMemberType_Normal : GroupMemberType_Silent).setUpdateDt(updateDt).build();
+                databaseStore.persistGroupMember(groupId, Arrays.asList(member), false);
+                groupMembers.put(groupId, member);
+            }
+        }
+        databaseStore.persistGroupInfo(groupInfo.toBuilder().setUpdateDt(updateDt).setMemberUpdateDt(updateDt).build());
+        mIMap.evict(groupId);
+
+        callbackGroupMemberEvent(operator, groupId, userList, ProtoConstants.GroupMemberUpdateEventType.Group_Member_Event_Type_Update, (type == 0 ? ProtoConstants.GroupMemberType.GroupMemberType_Normal : ProtoConstants.GroupMemberType.GroupMemberType_Manager) + "");
+        return ErrorCode.ERROR_CODE_SUCCESS;
+    }
+
+    @Override
     public ErrorCode setGroupManager(String operator, String groupId, int type, List<String> userList, boolean isAdmin) {
         HazelcastInstance hzInstance = m_Server.getHazelcastInstance();
         IMap<String, WFCMessage.GroupInfo> mIMap = hzInstance.getMap(GROUPS_MAP);
@@ -2129,6 +2168,8 @@ public class MemoryMessagesStore implements IMessagesStore {
             members = loadGroupMemberFromDB(hzInstance, groupId);
         }
 
+        JSONParser jsonParser = new JSONParser();
+
         boolean isInGroup = false;
         for (WFCMessage.GroupMember member : members) {
             if (member.getMemberId().equals(memberId)) {
@@ -2143,6 +2184,7 @@ public class MemoryMessagesStore implements IMessagesStore {
                 if (member.getMemberId().equals(memberId) && member.getType() == GroupMemberType_Removed) {
                     return ErrorCode.ERROR_CODE_NOT_IN_GROUP;
                 }
+
                 isInGroup = true;
                 break;
             }
