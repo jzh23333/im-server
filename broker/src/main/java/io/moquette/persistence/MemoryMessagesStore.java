@@ -2218,6 +2218,78 @@ public class MemoryMessagesStore implements IMessagesStore {
     }
 
     @Override
+    public ErrorCode deleteMessage(long messageUid, String clientId, boolean isAdmin) {
+        HazelcastInstance hzInstance = m_Server.getHazelcastInstance();
+        IMap<Long, MessageBundle> mIMap = hzInstance.getMap(MESSAGES_MAP);
+
+        MessageBundle messageBundle = mIMap.get(messageUid);
+        if (messageBundle != null) {
+            WFCMessage.Message message = messageBundle.getMessage();
+            boolean canRecall = false;
+            if (isAdmin) {
+                canRecall = true;
+            }
+
+            if (!canRecall && message.getConversation().getType() == ProtoConstants.ConversationType.ConversationType_ChatRoom) {
+                IMap<String, WFCMessage.ChatroomInfo> chatroomInfoMap = hzInstance.getMap(CHATROOMS);
+                WFCMessage.ChatroomInfo room = chatroomInfoMap.get(message.getConversation().getTarget());
+                //todo check is manager
+            }
+
+            if (!canRecall) {
+                return ErrorCode.ERROR_CODE_NOT_RIGHT;
+            }
+            
+            if(message.getContent().getType() == 80) {
+                return ErrorCode.ERROR_CODE_SUCCESS;
+            }
+
+            JSONObject json = new JSONObject();
+            json.put("s", message.getFromUser());
+            json.put("ts", message.getServerTimestamp());
+            json.put("t", message.getContent().getType());
+            json.put("sc", message.getContent().getSearchableContent());
+            json.put("c", message.getContent().getContent());
+            json.put("e", message.getContent().getExtra());
+            if (message.getContent().getData() != null && message.getContent().getData().size() > 0) {
+                json.put("b", Base64.getEncoder().encode(message.getContent().getData().toByteArray()));
+            }
+            if (message.getContent().getMediaType() > 0) {
+                json.put("mt", message.getContent().getMediaType());
+            }
+            if (!StringUtil.isNullOrEmpty(message.getContent().getRemoteMediaUrl())) {
+                json.put("mu", message.getContent().getRemoteMediaUrl());
+            }
+
+            String recalledContent = json.toJSONString();
+
+            JSONObject pushData = new JSONObject();
+            pushData.put("messageUid", messageUid);
+
+            message = message.toBuilder().setContent(WFCMessage.MessageContent.newBuilder()
+                .clearContent()
+                .clearSearchableContent()
+                .clearPushContent()
+                .setPersistFlag(1)
+                .setExpireDuration(0)
+                .setMentionedType(0)
+                .setType(80)
+                .setData(ByteString.copyFrom(String.valueOf(messageUid).getBytes()))
+                .setPushData(pushData.toJSONString())
+                .setExtra(recalledContent)).build();
+            messageBundle.setMessage(message);
+            messageBundle.setFromClientId(clientId);
+
+            databaseStore.deleteMessage(messageUid);
+
+            mIMap.put(messageUid, messageBundle, 7, TimeUnit.DAYS);
+            return ErrorCode.ERROR_CODE_SUCCESS;
+        } else {
+            return ErrorCode.ERROR_CODE_NOT_EXIST;
+        }
+    }
+
+    @Override
     public ErrorCode recallMessage(long messageUid, String operatorId, String clientId, boolean isAdmin) {
         HazelcastInstance hzInstance = m_Server.getHazelcastInstance();
         IMap<Long, MessageBundle> mIMap = hzInstance.getMap(MESSAGES_MAP);
@@ -2273,7 +2345,7 @@ public class MemoryMessagesStore implements IMessagesStore {
             if (!canRecall) {
                 return ErrorCode.ERROR_CODE_NOT_RIGHT;
             }
-            
+
             if(message.getContent().getType() == 80) {
                 return ErrorCode.ERROR_CODE_SUCCESS;
             }
