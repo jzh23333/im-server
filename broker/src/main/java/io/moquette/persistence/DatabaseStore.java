@@ -1879,6 +1879,115 @@ public class DatabaseStore {
         return 0;
     }
 
+    List<WFCMessage.GroupInfo> getPersistGroupInfoList(String groupId, String groupName, int pageNo, int pageSize) {
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet rs = null;
+
+        List<WFCMessage.GroupInfo> result = new ArrayList<>();
+        try {
+            connection = DBUtil.getConnection();
+            String sql = "select `_name`" +
+                ", `_portrait`" +
+                ", `_owner`" +
+                ", `_type`" +
+                ", `_extra`" +
+                ", `_dt`" +
+                ", `_member_count`" +
+                ", `_member_dt`" +
+                ", `_mute`" +
+                ", `_join_type`" +
+                ", `_private_chat`" +
+                ", `_searchable`" +
+                " from t_group  where 1=1";
+            if (!StringUtil.isNullOrEmpty(groupId)) {
+                sql += " and `_gid` = ?";
+            }
+            if (!StringUtil.isNullOrEmpty(groupName)) {
+                sql += " and `_name` like ?";
+            }
+            sql += "order by _createTime limit ?,?";
+
+            statement = connection.prepareStatement(sql);
+
+            int index = 1;
+            if (!StringUtil.isNullOrEmpty(groupId)) {
+                statement.setString(index++, groupId);
+            }
+            if (!StringUtil.isNullOrEmpty(groupName)) {
+                statement.setString(index++, "%" + groupName + "%");
+            }
+            if(pageNo <= 0) {
+                pageNo = 1;
+            }
+            if(pageSize <= 0) {
+                pageSize = 10;
+            }
+            pageNo = (pageNo-1)*pageSize;
+            statement.setInt(index++, pageNo);
+            statement.setInt(index++, pageSize);
+
+            rs = statement.executeQuery();
+            if (rs.next()) {
+                String strValue;
+                int intValue;
+                WFCMessage.GroupInfo.Builder builder = WFCMessage.GroupInfo.newBuilder();
+                index = 1;
+
+                builder.setTargetId(groupId);
+
+                strValue = rs.getString(index++);
+                strValue = (strValue == null ? "" : strValue);
+                builder.setName(strValue);
+
+                strValue = rs.getString(index++);
+                strValue = (strValue == null ? "" : strValue);
+                builder.setPortrait(strValue);
+
+                strValue = rs.getString(index++);
+                strValue = (strValue == null ? "" : strValue);
+                builder.setOwner(strValue);
+
+                intValue = rs.getInt(index++);
+                builder.setType(intValue);
+
+                strValue = rs.getString(index++);
+                strValue = (strValue == null ? "" : strValue);
+                builder.setExtra(strValue);
+
+                long longValue = rs.getLong(index++);
+                builder.setUpdateDt(longValue);
+
+                intValue = rs.getInt(index++);
+                builder.setMemberCount(intValue);
+
+                longValue = rs.getLong(index++);
+                builder.setMemberUpdateDt(longValue);
+
+                intValue = rs.getInt(index++);
+                builder.setMute(intValue);
+
+                intValue = rs.getInt(index++);
+                builder.setJoinType(intValue);
+
+                intValue = rs.getInt(index++);
+                builder.setPrivateChat(intValue);
+
+                intValue = rs.getInt(index++);
+                builder.setSearchable(intValue);
+
+                result.add(builder.build());
+            }
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            Utility.printExecption(LOG, e, RDBS_Exception);
+        } finally {
+            DBUtil.closeDB(connection, statement, rs);
+        }
+        return result;
+    }
+
     WFCMessage.GroupInfo getPersistGroupInfo(String groupId) {
         Connection connection = null;
         PreparedStatement statement = null;

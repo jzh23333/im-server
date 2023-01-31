@@ -116,6 +116,7 @@ public interface IMessagesStore {
     ErrorCode modifyGroupInfo(String operator, String groupId, int modifyType, String value, boolean isAdmin);
     ErrorCode modifyGroupMemberAlias(String operator, String groupId, String alias, String memberId, boolean isAdmin);
     ErrorCode modifyGroupMemberExtra(String operator, String groupId, String extra, String memberId, boolean isAdmin);
+    List<WFCMessage.GroupInfo> getGroupInfos(String groupId, String groupName, int pageNo, int pageSize);
     List<WFCMessage.GroupInfo> getGroupInfos(List<WFCMessage.UserRequest> requests);
     WFCMessage.GroupInfo getGroupInfo(String groupId);
     Set<String> getUserGroupIds(String userId);

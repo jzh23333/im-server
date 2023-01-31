@@ -65,6 +65,7 @@ public interface APIPath {
     String Create_Group = "/admin/group/create";
     String Group_Dismiss = "/admin/group/del";
     String Group_Transfer = "/admin/group/transfer";
+    String Group_List = "/admin/group/list";
     String Group_Get_Info = "/admin/group/get_info";
     String Group_Modify_Info = "/admin/group/modify";
     String Group_Member_List = "/admin/group/member/list";
