@@ -1892,6 +1892,11 @@ public class MemoryMessagesStore implements IMessagesStore {
     }
 
     @Override
+    public int getGroupInfosTotal(String groupId, String groupName) {
+        return databaseStore.getPersistGroupInfoTotal(groupId, groupName);
+    }
+
+    @Override
     public List<WFCMessage.GroupInfo> getGroupInfos(List<WFCMessage.UserRequest> requests) {
         HazelcastInstance hzInstance = m_Server.getHazelcastInstance();
         IMap<String, WFCMessage.GroupInfo> mIMap = hzInstance.getMap(GROUPS_MAP);

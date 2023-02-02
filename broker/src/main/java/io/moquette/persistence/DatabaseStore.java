@@ -1988,6 +1988,50 @@ public class DatabaseStore {
         return result;
     }
 
+    int getPersistGroupInfoTotal(String groupId, String groupName) {
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet rs = null;
+
+        try {
+            connection = DBUtil.getConnection();
+            String sql = "select count(*)" +
+                " from t_group  where 1=1";
+            if (!StringUtil.isNullOrEmpty(groupId)) {
+                sql += " and `_gid` = ?";
+            }
+            if (!StringUtil.isNullOrEmpty(groupName)) {
+                sql += " and `_name` like ?";
+            }
+
+            statement = connection.prepareStatement(sql);
+
+            int index = 1;
+            if (!StringUtil.isNullOrEmpty(groupId)) {
+                statement.setString(index++, groupId);
+            }
+            if (!StringUtil.isNullOrEmpty(groupName)) {
+                statement.setString(index++, "%" + groupName + "%");
+            }
+
+            rs = statement.executeQuery();
+            if (rs.next()) {
+                int intValue;
+                index = 1;
+
+                intValue = rs.getInt(index++);
+                return intValue;
+            }
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            Utility.printExecption(LOG, e, RDBS_Exception);
+        } finally {
+            DBUtil.closeDB(connection, statement, rs);
+        }
+        return 0;
+    }
+
     WFCMessage.GroupInfo getPersistGroupInfo(String groupId) {
         Connection connection = null;
         PreparedStatement statement = null;
