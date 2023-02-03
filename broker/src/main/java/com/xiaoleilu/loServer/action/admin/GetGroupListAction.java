@@ -37,23 +37,9 @@ public class GetGroupListAction extends AdminAction {
                 OutputGroupList out = new OutputGroupList();
                 out.setTotal(total);
                 if (total > 0) {
-                    List<WFCMessage.GroupInfo> groupInfos = messagesStore.getGroupInfos(inputGetGroup.getGroupId(), inputGetGroup.getGroupName(),
+                    List<PojoGroupInfo> groupInfos = messagesStore.getGroupInfos(inputGetGroup.getGroupId(), inputGetGroup.getGroupName(),
                         inputGetGroup.getPageNo(), inputGetGroup.getPageSize());
-                    out.setGroupInfos(new ArrayList<>());
-                    for (WFCMessage.GroupInfo groupInfo : groupInfos) {
-                        PojoGroupInfo pojoGroupInfo = new PojoGroupInfo();
-                        pojoGroupInfo.setExtra(groupInfo.getExtra());
-                        pojoGroupInfo.setName(groupInfo.getName());
-                        pojoGroupInfo.setOwner(groupInfo.getOwner());
-                        pojoGroupInfo.setPortrait(groupInfo.getPortrait());
-                        pojoGroupInfo.setTarget_id(groupInfo.getTargetId());
-                        pojoGroupInfo.setType(groupInfo.getType());
-                        pojoGroupInfo.setMute(groupInfo.getMute());
-                        pojoGroupInfo.setJoin_type(groupInfo.getJoinType());
-                        pojoGroupInfo.setPrivate_chat(groupInfo.getPrivateChat());
-                        pojoGroupInfo.setSearchable(groupInfo.getSearchable());
-                        out.getGroupInfos().add(pojoGroupInfo);
-                    }
+                    out.setGroupInfos(groupInfos);
                 }
                 RestResult result = RestResult.ok(out);
 

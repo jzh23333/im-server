@@ -1887,7 +1887,7 @@ public class MemoryMessagesStore implements IMessagesStore {
     }
 
     @Override
-    public List<WFCMessage.GroupInfo> getGroupInfos(String groupId, String groupName, int pageNo, int pageSize) {
+    public List<PojoGroupInfo> getGroupInfos(String groupId, String groupName, int pageNo, int pageSize) {
         return databaseStore.getPersistGroupInfoList(groupId, groupName, pageNo, pageSize);
     }
 

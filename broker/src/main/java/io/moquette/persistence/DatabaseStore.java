@@ -8,6 +8,7 @@
 
 package io.moquette.persistence;
 
+import cn.wildfirechat.pojos.PojoGroupInfo;
 import cn.wildfirechat.pojos.SystemSettingPojo;
 import cn.wildfirechat.proto.ProtoConstants;
 import cn.wildfirechat.proto.WFCMessage;
@@ -32,6 +33,7 @@ import java.io.InputStream;
 import java.security.MessageDigest;
 import java.sql.*;
 import java.util.*;
+import java.util.Date;
 import java.util.function.Function;
 
 
@@ -1879,12 +1881,12 @@ public class DatabaseStore {
         return 0;
     }
 
-    List<WFCMessage.GroupInfo> getPersistGroupInfoList(String groupId, String groupName, int pageNo, int pageSize) {
+    List<PojoGroupInfo> getPersistGroupInfoList(String groupId, String groupName, int pageNo, int pageSize) {
         Connection connection = null;
         PreparedStatement statement = null;
         ResultSet rs = null;
 
-        List<WFCMessage.GroupInfo> result = new ArrayList<>();
+        List<PojoGroupInfo> result = new ArrayList<>();
         try {
             connection = DBUtil.getConnection();
             String sql = "select `_name`" +
@@ -1895,6 +1897,7 @@ public class DatabaseStore {
                 ", `_dt`" +
                 ", `_member_count`" +
                 ", `_member_dt`" +
+                ", `_createTime`" +
                 ", `_mute`" +
                 ", `_join_type`" +
                 ", `_private_chat`" +
@@ -1931,52 +1934,55 @@ public class DatabaseStore {
             if (rs.next()) {
                 String strValue;
                 int intValue;
-                WFCMessage.GroupInfo.Builder builder = WFCMessage.GroupInfo.newBuilder();
+                PojoGroupInfo groupInfo = new PojoGroupInfo();
                 index = 1;
 
-                builder.setTargetId(groupId);
+                groupInfo.setTarget_id(groupId);
 
                 strValue = rs.getString(index++);
                 strValue = (strValue == null ? "" : strValue);
-                builder.setName(strValue);
+                groupInfo.setName(strValue);
 
                 strValue = rs.getString(index++);
                 strValue = (strValue == null ? "" : strValue);
-                builder.setPortrait(strValue);
+                groupInfo.setPortrait(strValue);
 
                 strValue = rs.getString(index++);
                 strValue = (strValue == null ? "" : strValue);
-                builder.setOwner(strValue);
+                groupInfo.setOwner(strValue);
 
                 intValue = rs.getInt(index++);
-                builder.setType(intValue);
+                groupInfo.setType(intValue);
 
                 strValue = rs.getString(index++);
                 strValue = (strValue == null ? "" : strValue);
-                builder.setExtra(strValue);
+                groupInfo.setExtra(strValue);
 
                 long longValue = rs.getLong(index++);
-                builder.setUpdateDt(longValue);
+                groupInfo.setUpdate_dt(longValue);
 
                 intValue = rs.getInt(index++);
-                builder.setMemberCount(intValue);
+                groupInfo.setMember_count(intValue);
 
                 longValue = rs.getLong(index++);
-                builder.setMemberUpdateDt(longValue);
+                groupInfo.setMember_update_dt(longValue);
+
+                Date dateValue = rs.getDate(index++);
+                groupInfo.setCreate_time(dateValue);
 
                 intValue = rs.getInt(index++);
-                builder.setMute(intValue);
+                groupInfo.setMute(intValue);
 
                 intValue = rs.getInt(index++);
-                builder.setJoinType(intValue);
+                groupInfo.setJoin_type(intValue);
 
                 intValue = rs.getInt(index++);
-                builder.setPrivateChat(intValue);
+                groupInfo.setPrivate_chat(intValue);
 
                 intValue = rs.getInt(index++);
-                builder.setSearchable(intValue);
+                groupInfo.setSearchable(intValue);
 
-                result.add(builder.build());
+                result.add(groupInfo);
             }
         } catch (SQLException e) {
             // TODO Auto-generated catch block

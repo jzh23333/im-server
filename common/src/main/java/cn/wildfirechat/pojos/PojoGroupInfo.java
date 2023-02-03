@@ -8,6 +8,8 @@
 
 package cn.wildfirechat.pojos;
 
+import java.util.Date;
+
 public class PojoGroupInfo {
     String target_id;
     String name;
@@ -21,6 +23,42 @@ public class PojoGroupInfo {
     int searchable;
     int max_member_count;
     int history_message;
+    int member_count;
+    Date create_time;
+    private long update_dt;
+    private long member_update_dt;
+
+    public long getUpdate_dt() {
+        return update_dt;
+    }
+
+    public void setUpdate_dt(long update_dt) {
+        this.update_dt = update_dt;
+    }
+
+    public long getMember_update_dt() {
+        return member_update_dt;
+    }
+
+    public void setMember_update_dt(long member_update_dt) {
+        this.member_update_dt = member_update_dt;
+    }
+
+    public Date getCreate_time() {
+        return create_time;
+    }
+
+    public void setCreate_time(Date create_time) {
+        this.create_time = create_time;
+    }
+
+    public int getMember_count() {
+        return member_count;
+    }
+
+    public void setMember_count(int member_count) {
+        this.member_count = member_count;
+    }
 
     public String getTarget_id() {
         return target_id;
