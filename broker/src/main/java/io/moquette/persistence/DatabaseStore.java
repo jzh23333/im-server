@@ -339,7 +339,6 @@ public class DatabaseStore {
             String sql = "select t1.`_mid`" +
                 ", t1.`_alias`" +
                 ", t1.`_type`" +
-                ", t1.`_dt`" +
                 ", t1.`_create_dt`" +
                 ", t1.`_extra`" +
                 ", t2.`_display_name`" +
