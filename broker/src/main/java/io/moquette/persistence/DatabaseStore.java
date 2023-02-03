@@ -1909,7 +1909,7 @@ public class DatabaseStore {
             if (!StringUtil.isNullOrEmpty(groupName)) {
                 sql += " and `_name` like ?";
             }
-            sql += " order by _createTime limit ?,?";
+            sql += " order by _createTime desc limit ?,?";
 
             statement = connection.prepareStatement(sql);
 
