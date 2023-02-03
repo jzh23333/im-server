@@ -29,9 +29,7 @@ public class GetGroupListAction extends AdminAction {
     public boolean action(Request request, Response response) {
         if (request.getNettyRequest() instanceof FullHttpRequest) {
             InputGetGroup inputGetGroup = getRequestBody(request.getNettyRequest(), InputGetGroup.class);
-            if (inputGetGroup != null
-                && (!StringUtil.isNullOrEmpty(inputGetGroup.getGroupId()))) {
-
+            if (inputGetGroup != null) {
                 int total = messagesStore.getGroupInfosTotal(inputGetGroup.getGroupId(), inputGetGroup.getGroupName());
 
                 OutputGroupList out = new OutputGroupList();
