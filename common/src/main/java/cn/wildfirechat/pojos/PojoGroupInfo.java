@@ -15,6 +15,7 @@ public class PojoGroupInfo {
     String name;
     String portrait;
     String owner;
+    String display_name;
     int type;
     String extra;
     int mute;
@@ -27,6 +28,14 @@ public class PojoGroupInfo {
     String create_time;
     private long update_dt;
     private long member_update_dt;
+
+    public String getDisplay_name() {
+        return display_name;
+    }
+
+    public void setDisplay_name(String display_name) {
+        this.display_name = display_name;
+    }
 
     public long getUpdate_dt() {
         return update_dt;

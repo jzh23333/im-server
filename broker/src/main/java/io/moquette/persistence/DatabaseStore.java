@@ -1889,27 +1889,31 @@ public class DatabaseStore {
         List<PojoGroupInfo> result = new ArrayList<>();
         try {
             connection = DBUtil.getConnection();
-            String sql = "select `_name`" +
-                ", `_portrait`" +
-                ", `_owner`" +
-                ", `_type`" +
-                ", `_extra`" +
-                ", `_dt`" +
-                ", `_member_count`" +
-                ", `_member_dt`" +
-                ", `_createTime`" +
-                ", `_mute`" +
-                ", `_join_type`" +
-                ", `_private_chat`" +
-                ", `_searchable`" +
-                " from t_group  where 1=1";
+            String sql = "select t1.`_gid`" +
+                ", t1.`_name`" +
+                ", t1.`_portrait`" +
+                ", t1.`_owner`" +
+                ", t1.`_type`" +
+                ", t1.`_extra`" +
+                ", t1.`_dt`" +
+                ", t1.`_member_count`" +
+                ", t1.`_member_dt`" +
+                ", t1.`_createTime`" +
+                ", t1.`_mute`" +
+                ", t1.`_join_type`" +
+                ", t1.`_private_chat`" +
+                ", t1.`_searchable`" +
+                ", t2.`_display_name`" +
+                " from t_group t1 " +
+                " left join t_user t2 on t1._owner = t2._uid" +
+                " where 1=1";
             if (!StringUtil.isNullOrEmpty(groupId)) {
-                sql += " and `_gid` = ?";
+                sql += " and t1.`_gid` = ?";
             }
             if (!StringUtil.isNullOrEmpty(groupName)) {
-                sql += " and `_name` like ?";
+                sql += " and t1.`_name` like ?";
             }
-            sql += " order by _createTime desc limit ?,?";
+            sql += " order by t1._createTime desc limit ?,?";
 
             statement = connection.prepareStatement(sql);
 
@@ -1937,7 +1941,9 @@ public class DatabaseStore {
                 PojoGroupInfo groupInfo = new PojoGroupInfo();
                 index = 1;
 
-                groupInfo.setTarget_id(groupId);
+                strValue = rs.getString(index++);
+                strValue = (strValue == null ? "" : strValue);
+                groupInfo.setTarget_id(strValue);
 
                 strValue = rs.getString(index++);
                 strValue = (strValue == null ? "" : strValue);
@@ -1981,6 +1987,10 @@ public class DatabaseStore {
 
                 intValue = rs.getInt(index++);
                 groupInfo.setSearchable(intValue);
+
+                strValue = rs.getString(index++);
+                strValue = (strValue == null ? "" : strValue);
+                groupInfo.setDisplay_name(strValue);
 
                 result.add(groupInfo);
             }
