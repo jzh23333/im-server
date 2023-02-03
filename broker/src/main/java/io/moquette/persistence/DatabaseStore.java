@@ -1967,8 +1967,8 @@ public class DatabaseStore {
                 longValue = rs.getLong(index++);
                 groupInfo.setMember_update_dt(longValue);
 
-                Date dateValue = rs.getDate(index++);
-                groupInfo.setCreate_time(dateValue);
+                strValue = rs.getString(index++);
+                groupInfo.setCreate_time(strValue);
 
                 intValue = rs.getInt(index++);
                 groupInfo.setMute(intValue);

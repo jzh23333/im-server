@@ -24,7 +24,7 @@ public class PojoGroupInfo {
     int max_member_count;
     int history_message;
     int member_count;
-    Date create_time;
+    String create_time;
     private long update_dt;
     private long member_update_dt;
 
@@ -44,11 +44,11 @@ public class PojoGroupInfo {
         this.member_update_dt = member_update_dt;
     }
 
-    public Date getCreate_time() {
+    public String getCreate_time() {
         return create_time;
     }
 
-    public void setCreate_time(Date create_time) {
+    public void setCreate_time(String create_time) {
         this.create_time = create_time;
     }
 
