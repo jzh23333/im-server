@@ -120,7 +120,7 @@ public interface IMessagesStore {
     WFCMessage.GroupInfo getGroupInfo(String groupId);
     Set<String> getUserGroupIds(String userId);
     Set<String> getCommonGroupIds(String userId1, String userId2);
-    List<PojoGroupMember> getGroupMembers(String groupId);
+    List<PojoGroupMember> getGroupMembers(String groupId, String displayName, Integer type, int pageNo, int pageSize);
     ErrorCode getGroupMembers(String fromUser, String groupId, long maxDt, List<WFCMessage.GroupMember> members);
     WFCMessage.GroupMember getGroupMember(String groupId, String memberId);
     ErrorCode transferGroup(String operator, String groupId, String newOwner, boolean isAdmin);

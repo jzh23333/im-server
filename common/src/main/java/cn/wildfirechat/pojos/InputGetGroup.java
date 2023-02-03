@@ -13,9 +13,29 @@ public class InputGetGroup {
 
     private String groupName;
 
+    private String displayName;
+
+    private Integer type;
+
     private Integer pageNo;
 
     private Integer pageSize;
+
+    public Integer getType() {
+        return type;
+    }
+
+    public void setType(Integer type) {
+        this.type = type;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
 
     public String getGroupId() {
         return groupId;

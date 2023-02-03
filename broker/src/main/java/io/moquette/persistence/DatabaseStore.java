@@ -328,7 +328,7 @@ public class DatabaseStore {
         return 0;
     }
 
-    List<PojoGroupMember> getGroupMembers(String groupId) {
+    List<PojoGroupMember> getGroupMembers(String groupId, String displayName, Integer type, int pageNo, int pageSize) {
         Connection connection = null;
         PreparedStatement statement = null;
         ResultSet rs = null;
@@ -345,9 +345,33 @@ public class DatabaseStore {
                 " from t_group_member t1" +
                 " left join t_user t2 on t1._mid = t2._uid" +
                 " where t1._gid = ?";
+            if (type != null) {
+                sql += " and t1._type = ?";
+            }
+            if (!StringUtil.isNullOrEmpty(displayName)) {
+                sql += " and t2.__display_name like ?";
+            }
+            sql += " limit ?,?";
             statement = connection.prepareStatement(sql);
 
-            statement.setString(1, groupId);
+            int qIndex = 1;
+            statement.setString(qIndex++, groupId);
+            if (type != null) {
+                statement.setInt(qIndex++, type);
+            }
+            if (!StringUtil.isNullOrEmpty(displayName)) {
+                statement.setString(qIndex++, displayName);
+            }
+            if(pageNo <= 0) {
+                pageNo = 1;
+            }
+            if(pageSize <= 0) {
+                pageSize = 10;
+            }
+            pageNo = (pageNo-1)*pageSize;
+            statement.setInt(qIndex++, pageNo);
+            statement.setInt(qIndex++, pageSize);
+
             int index;
 
 

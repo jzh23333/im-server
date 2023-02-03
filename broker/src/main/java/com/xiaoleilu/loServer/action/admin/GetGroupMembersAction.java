@@ -45,7 +45,9 @@ public class GetGroupMembersAction extends AdminAction {
             if (inputGetGroup != null
                 && (!StringUtil.isNullOrEmpty(inputGetGroup.getGroupId()))) {
 
-                List<PojoGroupMember> members = messagesStore.getGroupMembers(inputGetGroup.getGroupId());
+                List<PojoGroupMember> members = messagesStore.getGroupMembers(inputGetGroup.getGroupId(),
+                    inputGetGroup.getDisplayName(), inputGetGroup.getType(), inputGetGroup.getPageNo(),
+                    inputGetGroup.getPageSize());
 
                 RestResult result;
                 OutputGroupMemberList out = new OutputGroupMemberList();

@@ -1938,8 +1938,8 @@ public class MemoryMessagesStore implements IMessagesStore {
     }
 
     @Override
-    public List<PojoGroupMember> getGroupMembers(String groupId) {
-        return databaseStore.getGroupMembers(groupId);
+    public List<PojoGroupMember> getGroupMembers(String groupId, String displayName, Integer type, int pageNo, int pageSize) {
+        return databaseStore.getGroupMembers(groupId, displayName, type, pageNo, pageSize);
     }
 
     @Override
