@@ -360,7 +360,7 @@ public class DatabaseStore {
                 statement.setInt(qIndex++, type);
             }
             if (!StringUtil.isNullOrEmpty(displayName)) {
-                statement.setString(qIndex++, displayName);
+                statement.setString(qIndex++, "%"+ displayName + "%");
             }
             if(pageNo <= 0) {
                 pageNo = 1;
