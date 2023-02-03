@@ -415,6 +415,53 @@ public class DatabaseStore {
         return new ArrayList<>();
     }
 
+    int getGroupMembersTotal(String groupId, String displayName, Integer type) {
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet rs = null;
+
+        try {
+            connection = DBUtil.getConnection();
+            String sql = "select count(t1.id)" +
+                " from t_group_member t1" +
+                " left join t_user t2 on t1._mid = t2._uid" +
+                " where t1._gid = ?";
+            if (type != null) {
+                sql += " and t1._type = ?";
+            }
+            if (!StringUtil.isNullOrEmpty(displayName)) {
+                sql += " and t2.__display_name like ?";
+            }
+            statement = connection.prepareStatement(sql);
+
+            int qIndex = 1;
+            statement.setString(qIndex++, groupId);
+            if (type != null) {
+                statement.setInt(qIndex++, type);
+            }
+            if (!StringUtil.isNullOrEmpty(displayName)) {
+                statement.setString(qIndex++, "%"+ displayName + "%");
+            }
+
+            int index;
+
+            rs = statement.executeQuery();
+            while (rs.next()) {
+                index = 1;
+
+                int value = rs.getInt(index++);
+                return value;
+            }
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            Utility.printExecption(LOG, e, RDBS_Exception);
+        } finally {
+            DBUtil.closeDB(connection, statement, rs);
+        }
+        return 0;
+    }
+
     synchronized Collection<WFCMessage.GroupMember>  reloadGroupMemberFromDB(HazelcastInstance hzInstance, String groupId) {
         MultiMap<String, WFCMessage.GroupMember> groupMembers = hzInstance.getMultiMap(MemoryMessagesStore.GROUP_MEMBERS);
         if (groupMembers.get(groupId).size() > 0) {

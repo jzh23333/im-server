@@ -12,6 +12,7 @@ import java.util.List;
 
 public class OutputGroupMemberList {
     private List<PojoGroupMember> members;
+    private int total;
 
     public List<PojoGroupMember> getMembers() {
         return members;
@@ -19,5 +20,13 @@ public class OutputGroupMemberList {
 
     public void setMembers(List<PojoGroupMember> members) {
         this.members = members;
+    }
+
+    public int getTotal() {
+        return total;
+    }
+
+    public void setTotal(int total) {
+        this.total = total;
     }
 }

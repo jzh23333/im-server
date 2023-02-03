@@ -44,14 +44,19 @@ public class GetGroupMembersAction extends AdminAction {
             InputGetGroup inputGetGroup = getRequestBody(request.getNettyRequest(), InputGetGroup.class);
             if (inputGetGroup != null
                 && (!StringUtil.isNullOrEmpty(inputGetGroup.getGroupId()))) {
-
-                List<PojoGroupMember> members = messagesStore.getGroupMembers(inputGetGroup.getGroupId(),
-                    inputGetGroup.getDisplayName(), inputGetGroup.getType(), inputGetGroup.getPageNo(),
-                    inputGetGroup.getPageSize());
+                int total = messagesStore.getGroupMembersTotal(inputGetGroup.getGroupId(), inputGetGroup.getDisplayName(),
+                    inputGetGroup.getType());
 
                 RestResult result;
                 OutputGroupMemberList out = new OutputGroupMemberList();
-                out.setMembers(members);
+                out.setTotal(total);
+
+                if (total > 0) {
+                    List<PojoGroupMember> members = messagesStore.getGroupMembers(inputGetGroup.getGroupId(),
+                        inputGetGroup.getDisplayName(), inputGetGroup.getType(), inputGetGroup.getPageNo(),
+                        inputGetGroup.getPageSize());
+                    out.setMembers(members);
+                }
                 result = RestResult.ok(out);
 
                 setResponseContent(result, response);
