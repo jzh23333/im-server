@@ -9,6 +9,7 @@
 package io.moquette.persistence;
 
 import cn.wildfirechat.pojos.PojoGroupInfo;
+import cn.wildfirechat.pojos.PojoGroupMember;
 import cn.wildfirechat.pojos.SystemSettingPojo;
 import cn.wildfirechat.proto.ProtoConstants;
 import cn.wildfirechat.proto.WFCMessage;
@@ -325,6 +326,70 @@ public class DatabaseStore {
             DBUtil.closeDB(connection, statement, rs);
         }
         return 0;
+    }
+
+    List<PojoGroupMember> getGroupMembers(String groupId) {
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet rs = null;
+
+        List<PojoGroupMember> groupMembers = new ArrayList<>();
+        try {
+            connection = DBUtil.getConnection();
+            String sql = "select t1.`_mid`" +
+                ", t1.`_alias`" +
+                ", t1.`_type`" +
+                ", t1.`_dt`" +
+                ", t1.`_create_dt`" +
+                ", t1.`_extra`" +
+                ", t2.`_display_name`" +
+                " from t_group_member t1" +
+                " left join t_user t2 on t1._mid = t2._uid" +
+                " where t1._gid = ?";
+            statement = connection.prepareStatement(sql);
+
+            statement.setString(1, groupId);
+            int index;
+
+
+            rs = statement.executeQuery();
+            while (rs.next()) {
+                PojoGroupMember groupMember = new PojoGroupMember();
+                index = 1;
+
+                String value = rs.getString(index++);
+                value = (value == null ? "" : value);
+                groupMember.setMember_id(value);
+
+                value = rs.getString(index++);
+                value = (value == null ? "" : value);
+                groupMember.setAlias(value);
+
+                int intvalue = rs.getInt(index++);
+                groupMember.setType(intvalue);
+
+                long longValue = rs.getLong(index++);
+                groupMember.setCreateDt(longValue);
+
+                value = rs.getString(index++);
+                value = (value == null ? "" : value);
+                groupMember.setExtra(value);
+
+                value = rs.getString(index++);
+                value = (value == null ? "" : value);
+                groupMember.setDisplay_name(value);
+
+                groupMembers.add(groupMember);
+            }
+            return groupMembers;
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            Utility.printExecption(LOG, e, RDBS_Exception);
+        } finally {
+            DBUtil.closeDB(connection, statement, rs);
+        }
+        return new ArrayList<>();
     }
 
     synchronized Collection<WFCMessage.GroupMember>  reloadGroupMemberFromDB(HazelcastInstance hzInstance, String groupId) {

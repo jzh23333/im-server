@@ -16,13 +16,10 @@
 
 package io.moquette.spi;
 
-import cn.wildfirechat.pojos.InputOutputUserInfo;
-import cn.wildfirechat.pojos.PojoGroupInfo;
-import cn.wildfirechat.pojos.SystemSettingPojo;
+import cn.wildfirechat.pojos.*;
 import cn.wildfirechat.proto.ProtoConstants;
 import cn.wildfirechat.proto.WFCMessage;
 import com.xiaoleilu.loServer.model.FriendData;
-import cn.wildfirechat.pojos.InputOutputUserBlockStatus;
 import io.moquette.persistence.DatabaseStore;
 import io.moquette.persistence.MemorySessionStore;
 import io.moquette.persistence.UserClientEntry;
@@ -123,6 +120,7 @@ public interface IMessagesStore {
     WFCMessage.GroupInfo getGroupInfo(String groupId);
     Set<String> getUserGroupIds(String userId);
     Set<String> getCommonGroupIds(String userId1, String userId2);
+    List<PojoGroupMember> getGroupMembers(String groupId);
     ErrorCode getGroupMembers(String fromUser, String groupId, long maxDt, List<WFCMessage.GroupMember> members);
     WFCMessage.GroupMember getGroupMember(String groupId, String memberId);
     ErrorCode transferGroup(String operator, String groupId, String newOwner, boolean isAdmin);

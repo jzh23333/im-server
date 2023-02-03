@@ -45,29 +45,12 @@ public class GetGroupMembersAction extends AdminAction {
             if (inputGetGroup != null
                 && (!StringUtil.isNullOrEmpty(inputGetGroup.getGroupId()))) {
 
-                List<WFCMessage.GroupMember> members = new ArrayList<>();
-                ErrorCode errorCode = messagesStore.getGroupMembers(null, inputGetGroup.getGroupId(), 0, members);
+                List<PojoGroupMember> members = messagesStore.getGroupMembers(inputGetGroup.getGroupId());
 
                 RestResult result;
-                if (errorCode != ErrorCode.ERROR_CODE_SUCCESS) {
-                    result = RestResult.resultOf(errorCode);
-                } else {
-                    OutputGroupMemberList out = new OutputGroupMemberList();
-                    out.setMembers(new ArrayList<>());
-                    for (WFCMessage.GroupMember member : members) {
-                        if (member.getType() == ProtoConstants.GroupMemberType.GroupMemberType_Removed) {
-                            continue;
-                        }
-                        PojoGroupMember pm = new PojoGroupMember();
-                        pm.setMember_id(member.getMemberId());
-                        pm.setAlias(member.getAlias());
-                        pm.setType(member.getType());
-                        pm.setExtra(member.getExtra());
-                        pm.setCreateDt(member.getCreateDt());
-                        out.getMembers().add(pm);
-                    }
-                    result = RestResult.ok(out);
-                }
+                OutputGroupMemberList out = new OutputGroupMemberList();
+                out.setMembers(members);
+                result = RestResult.ok(out);
 
                 setResponseContent(result, response);
             } else {
