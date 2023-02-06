@@ -53,6 +53,7 @@ public interface APIPath {
     String Msg_Delete = "/admin/message/delete";
     String Msg_Update = "/admin/message/update";
     String Msg_GetOne = "/admin/message/get_one";
+    String Msg_GetList = "/admin/message/list";
     String Msg_Broadcast = "/admin/message/broadcast";
     String Msg_Multicast = "/admin/message/multicast";
     String Msg_RecallBroadCast = "/admin/message/recall_broadcast";

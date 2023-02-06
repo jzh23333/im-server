@@ -10,6 +10,7 @@ package io.moquette.persistence;
 
 import cn.wildfirechat.pojos.PojoGroupInfo;
 import cn.wildfirechat.pojos.PojoGroupMember;
+import cn.wildfirechat.pojos.PojoMessage;
 import cn.wildfirechat.pojos.SystemSettingPojo;
 import cn.wildfirechat.proto.ProtoConstants;
 import cn.wildfirechat.proto.WFCMessage;
@@ -900,6 +901,139 @@ public class DatabaseStore {
             DBUtil.closeDB(connection, statement, resultSet);
         }
         return null;
+    }
+
+    List<PojoMessage> getMessages(String searchable, long timestamp, int conversationType, int messageType, int pageNo, int pageSize) {
+        String sql = "select  t1.`_mid`" +
+            ", t1.`_from`" +
+            ", t2.`_display_name` from_name" +
+            ", t1.`_type`" +
+            ", t1.`_target`" +
+            ", t3.`_display_name` target_name" +
+            ", t1.`_data`" +
+            ", t1.`_dt` " +
+            ", t1.`_content_type` " +
+            " from " + MessageShardingUtil.getMessageTable(MessageShardingUtil.getMsgIdFromTimestamp(timestamp)) +" t1" +
+            " left join t_user t2 on t1._from = t2._uid" +
+            " left join t_user t3 on t1._target = t3._uid" +
+            " where 1=1";
+        if (conversationType > 0) {
+            sql += "t1._content_type = ?";
+        }
+        if (messageType > 0) {
+            sql += "t1._type = ?";
+        }
+        if (!StringUtil.isNullOrEmpty(searchable)) {
+            sql += " and t1._searchable_key like ?";
+        }
+
+        sql += " order by t1.`_dt` DESC limit ?,?";
+
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet resultSet = null;
+
+        List<PojoMessage> messageList = new ArrayList<>(pageSize);
+        try {
+            connection = DBUtil.getConnection();
+            statement = connection.prepareStatement(sql);
+            int qIndex = 1;
+
+            if (conversationType > 0) {
+                statement.setInt(qIndex++, conversationType);
+            }
+            if (messageType > 0) {
+                statement.setInt(qIndex++, messageType);
+            }
+            if (!StringUtil.isNullOrEmpty(searchable)) {
+                statement.setString(qIndex++, "%"+searchable+"%");
+            }
+            if(pageNo <= 0) {
+                pageNo = 1;
+            }
+            if(pageSize <= 0) {
+                pageSize = 10;
+            }
+            pageNo = (pageNo-1)*pageSize;
+            statement.setInt(qIndex++, pageNo);
+            statement.setInt(qIndex++, pageSize);
+            resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                PojoMessage message = new PojoMessage();
+                int index = 1;
+                message.setMessageUid(resultSet.getLong(index++));
+                message.setSenderId(resultSet.getString(index++));
+                String strValue = resultSet.getString(index++);
+                strValue = strValue == null ? "" : strValue;
+                message.setSenderDisplayName(strValue);
+
+                message.setMessageType(resultSet.getInt(index++));
+
+                message.setReceiverId(resultSet.getString(index++));
+                strValue = resultSet.getString(index++);
+                strValue = strValue == null ? "" : strValue;
+                message.setReceiverDisplayName(strValue);
+
+                Blob blob = resultSet.getBlob(index++);
+
+                WFCMessage.MessageContent messageContent = WFCMessage.MessageContent.parseFrom(encryptMessageContent(toByteArray(blob.getBinaryStream()), false));
+                message.setContent(messageContent.getContent());
+                message.setTimestamp(resultSet.getTimestamp(index++).getTime());
+                message.setConversationType(resultSet.getInt(index++));
+
+                messageList.add(message);
+            }
+        } catch (SQLException | IOException e) {
+            e.printStackTrace();
+            Utility.printExecption(LOG, e, RDBS_Exception);
+        } finally {
+            DBUtil.closeDB(connection, statement, resultSet);
+        }
+        return messageList;
+    }
+
+    int getMessagesTotal(String searchable, long timestamp, int conversationType, int messageType) {
+        String sql = "select  count(t1.`_mid`)" +
+            " from " + MessageShardingUtil.getMessageTable(MessageShardingUtil.getMsgIdFromTimestamp(timestamp)) +" t1" +
+            " where 1=1";
+        if (conversationType > 0) {
+            sql += "t1._content_type = ?";
+        }
+        if (messageType > 0) {
+            sql += "t1._type = ?";
+        }
+        if (!StringUtil.isNullOrEmpty(searchable)) {
+            sql += " and t1._searchable_key like ?";
+        }
+
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet resultSet = null;
+        try {
+            connection = DBUtil.getConnection();
+            statement = connection.prepareStatement(sql);
+            int qIndex = 1;
+
+            if (conversationType > 0) {
+                statement.setInt(qIndex++, conversationType);
+            }
+            if (messageType > 0) {
+                statement.setInt(qIndex++, messageType);
+            }
+            if (!StringUtil.isNullOrEmpty(searchable)) {
+                statement.setString(qIndex++, "%"+searchable+"%");
+            }
+            resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                return resultSet.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            Utility.printExecption(LOG, e, RDBS_Exception);
+        } finally {
+            DBUtil.closeDB(connection, statement, resultSet);
+        }
+        return 0;
     }
 
     void deleteMessage(long messageId) {
