@@ -6,7 +6,6 @@ import cn.wildfirechat.common.ErrorCode;
 import cn.wildfirechat.pojos.InputGetMessage;
 import cn.wildfirechat.pojos.OutputMessageList;
 import cn.wildfirechat.pojos.PojoMessage;
-import com.hazelcast.util.StringUtil;
 import com.xiaoleilu.loServer.RestResult;
 import com.xiaoleilu.loServer.annotation.HttpMethod;
 import com.xiaoleilu.loServer.annotation.Route;
@@ -29,7 +28,7 @@ public class GetMessageListAction extends AdminAction {
     public boolean action(Request request, Response response) {
         if (request.getNettyRequest() instanceof FullHttpRequest) {
             InputGetMessage getMessage = getRequestBody(request.getNettyRequest(), InputGetMessage.class);
-            if (getMessage != null && getMessage.getTimestamp() == 0) {
+            if (getMessage != null && getMessage.getTimestamp() > 0) {
                 int total = messagesStore.getMessageListTotal(getMessage.getSearchable(), getMessage.getTimestamp(),
                     getMessage.getConversationType(), getMessage.getMessageType());
 
