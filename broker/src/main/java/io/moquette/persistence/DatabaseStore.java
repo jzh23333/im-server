@@ -940,10 +940,10 @@ public class DatabaseStore {
             statement = connection.prepareStatement(sql);
             int qIndex = 1;
 
-            if (conversationType > 0) {
+            if (conversationType != null) {
                 statement.setInt(qIndex++, conversationType);
             }
-            if (messageType > 0) {
+            if (messageType != null) {
                 statement.setInt(qIndex++, messageType);
             }
             if (!StringUtil.isNullOrEmpty(searchable)) {
@@ -1015,10 +1015,10 @@ public class DatabaseStore {
             statement = connection.prepareStatement(sql);
             int qIndex = 1;
 
-            if (conversationType > 0) {
+            if (conversationType != null) {
                 statement.setInt(qIndex++, conversationType);
             }
-            if (messageType > 0) {
+            if (messageType != null) {
                 statement.setInt(qIndex++, messageType);
             }
             if (!StringUtil.isNullOrEmpty(searchable)) {
