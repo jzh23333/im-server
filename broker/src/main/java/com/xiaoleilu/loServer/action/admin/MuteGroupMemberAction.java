@@ -37,7 +37,7 @@ public class MuteGroupMemberAction extends AdminAction {
         if (request.getNettyRequest() instanceof FullHttpRequest) {
             InputMuteGroupMember inputMuteGroupMember = getRequestBody(request.getNettyRequest(), InputMuteGroupMember.class);
             if (inputMuteGroupMember.isValide()) {
-                sendApiMessage(response, inputMuteGroupMember.getOperator(), IMTopic.SilentGroupMemberTopic, inputMuteGroupMember.toProtoGroupRequest().toByteArray(), result -> {
+                sendApiMessage(response, inputMuteGroupMember.getOperator(), IMTopic.MuteGroupMemberTopic, inputMuteGroupMember.toProtoGroupRequest().toByteArray(), result -> {
                     ByteBuf byteBuf = Unpooled.buffer();
                     byteBuf.writeBytes(result);
                     ErrorCode errorCode = ErrorCode.fromCode(byteBuf.readByte());

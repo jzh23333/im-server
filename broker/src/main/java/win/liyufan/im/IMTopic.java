@@ -39,6 +39,7 @@ public interface IMTopic {
     String TransferGroupTopic = "GTG";
     String SetGroupManagerTopic = "GSM";
     String MuteGroupMemberTopic = "GMM";
+    String AllowGroupMemberTopic = "AGM";
     String GetMyGroupsTopic = "GMGS";
     String GetCommonGroupsTopic = "GCGS";
 
