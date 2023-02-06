@@ -4,8 +4,8 @@ public class InputGetMessage {
     private String displayName;
     private String searchable;
     private long timestamp;
-    private int conversationType;
-    private int messageType;
+    private Integer conversationType;
+    private Integer messageType;
     private int pageNo;
     private int pageSize;
 

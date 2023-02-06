@@ -231,8 +231,8 @@ public interface IMessagesStore {
     boolean removeSensitiveWords(List<String> words);
     List<String> getAllSensitiveWords();
 
-    List<PojoMessage> getMessageList(String searchable, long timestamp, int conversationType, int messageType, int pageNo, int pageSize);
-    int getMessageListTotal(String searchable, long timestamp, int conversationType, int messageType);
+    List<PojoMessage> getMessageList(String searchable, long timestamp, Integer conversationType, Integer messageType, int pageNo, int pageSize);
+    int getMessageListTotal(String searchable, long timestamp, Integer conversationType, Integer messageType);
     WFCMessage.Message getMessage(long messageId);
 
     boolean isAllowClientCustomGroupNotification();

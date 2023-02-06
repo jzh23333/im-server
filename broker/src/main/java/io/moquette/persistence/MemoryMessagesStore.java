@@ -4355,12 +4355,12 @@ public class MemoryMessagesStore implements IMessagesStore {
     }
 
     @Override
-    public int getMessageListTotal(String searchable, long timestamp, int conversationType, int messageType) {
+    public int getMessageListTotal(String searchable, long timestamp, Integer conversationType, Integer messageType) {
         return databaseStore.getMessagesTotal(searchable, timestamp, conversationType, messageType);
     }
 
     @Override
-    public List<PojoMessage> getMessageList(String searchable, long timestamp, int conversationType, int messageType, int pageNo, int pageSize) {
+    public List<PojoMessage> getMessageList(String searchable, long timestamp, Integer conversationType, Integer messageType, int pageNo, int pageSize) {
         return databaseStore.getMessages(searchable, timestamp, conversationType, messageType, pageNo, pageSize);
     }
 

@@ -903,19 +903,20 @@ public class DatabaseStore {
         return null;
     }
 
-    List<PojoMessage> getMessages(String searchable, long timestamp, int conversationType, int messageType, int pageNo, int pageSize) {
+    List<PojoMessage> getMessages(String searchable, long timestamp, Integer conversationType, Integer messageType, int pageNo, int pageSize) {
         String sql = "select  t1.`_mid`" +
             ", t1.`_from`" +
             ", t2.`_display_name` from_name" +
             ", t1.`_type`" +
             ", t1.`_target`" +
-            ", t3.`_display_name` target_name" +
+            ", if(t1.`_type`=0, t3.`_display_name`, t4.`_name`) target_name" +
             ", t1.`_data`" +
             ", t1.`_dt` " +
             ", t1.`_content_type` " +
             " from " + MessageShardingUtil.getMessageTable(MessageShardingUtil.getMsgIdFromTimestamp(timestamp)) +" t1" +
             " left join t_user t2 on t1._from = t2._uid" +
             " left join t_user t3 on t1._target = t3._uid" +
+            " left join t_group t4 on t1._target = t4._gid" +
             " where 1=1";
         if (conversationType > 0) {
             sql += " and t1._content_type = ?";
@@ -992,14 +993,14 @@ public class DatabaseStore {
         return messageList;
     }
 
-    int getMessagesTotal(String searchable, long timestamp, int conversationType, int messageType) {
+    int getMessagesTotal(String searchable, long timestamp, Integer conversationType, Integer messageType) {
         String sql = "select  count(t1.`_mid`)" +
             " from " + MessageShardingUtil.getMessageTable(MessageShardingUtil.getMsgIdFromTimestamp(timestamp)) +" t1" +
             " where 1=1";
-        if (conversationType > 0) {
+        if (conversationType != null) {
             sql += " and t1._content_type = ?";
         }
-        if (messageType > 0) {
+        if (messageType != null) {
             sql += " and t1._type = ?";
         }
         if (!StringUtil.isNullOrEmpty(searchable)) {
