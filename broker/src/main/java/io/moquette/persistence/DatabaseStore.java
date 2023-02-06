@@ -978,7 +978,7 @@ public class DatabaseStore {
 
                 Blob blob = resultSet.getBlob(index++);
                 WFCMessage.MessageContent messageContent = WFCMessage.MessageContent.parseFrom(encryptMessageContent(toByteArray(blob.getBinaryStream()), false));
-                message.setContent(messageContent.toString());
+                message.setContent(messageContent.getContent());
 
                 strValue = resultSet.getString(index++);
                 strValue = strValue == null ? "" : strValue;
