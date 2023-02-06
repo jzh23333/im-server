@@ -24,7 +24,7 @@ public class SilentGroupMemberHandler extends GroupHandler<WFCMessage.SetGroupMa
 
         if(requestSourceType == ProtoConstants.RequestSourceType.Request_From_User) {
             int forbiddenClientOperation = m_messagesStore.getGroupForbiddenClientOperation();
-            if((forbiddenClientOperation & ProtoConstants.ForbiddenClientGroupOperationMask.Forbidden_Set_Group_Manage) > 0) {
+            if((forbiddenClientOperation & ProtoConstants.ForbiddenClientGroupOperationMask.Forbidden_Mute_Group_Member) > 0) {
                 return ErrorCode.ERROR_CODE_NOT_RIGHT;
             }
         }
@@ -34,7 +34,13 @@ public class SilentGroupMemberHandler extends GroupHandler<WFCMessage.SetGroupMa
             if (request.hasNotifyContent() && request.getNotifyContent().getType() > 0) {
                 sendGroupNotification(fromUser, request.getGroupId(), request.getToLineList(), request.getNotifyContent());
             } else {
-                WFCMessage.MessageContent content = new GroupNotificationBinaryContent(request.getGroupId(), fromUser, request.getType() + "", request.getUserIdList()).getSetGroupManagerNotifyContent();
+                WFCMessage.MessageContent content = null;
+                if (request.getType() == 0) {
+                    content = new GroupNotificationBinaryContent(request.getGroupId(), fromUser, request.getType() + "", request.getUserIdList()).getMuteGroupMemberNotifyContent();
+
+                } else {
+                    content = new GroupNotificationBinaryContent(request.getGroupId(), fromUser, request.getType() + "", request.getUserIdList()).getAllowGroupMemberNotifyContent();
+                }
                 sendGroupNotification(fromUser, request.getGroupId(), request.getToLineList(), content);
             }
         }
