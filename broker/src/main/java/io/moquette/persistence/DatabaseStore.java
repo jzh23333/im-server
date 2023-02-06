@@ -911,6 +911,7 @@ public class DatabaseStore {
             ", t1.`_target`" +
             ", if(t1.`_type`=0, t3.`_display_name`, t4.`_name`) target_name" +
             ", t1.`_data`" +
+            ", t1.`_searchable_key`" +
             ", t1.`_dt` " +
             ", t1.`_content_type` " +
             " from " + MessageShardingUtil.getMessageTable(MessageShardingUtil.getMsgIdFromTimestamp(timestamp)) +" t1" +
@@ -976,9 +977,12 @@ public class DatabaseStore {
                 message.setReceiverDisplayName(strValue);
 
                 Blob blob = resultSet.getBlob(index++);
-
                 WFCMessage.MessageContent messageContent = WFCMessage.MessageContent.parseFrom(encryptMessageContent(toByteArray(blob.getBinaryStream()), false));
                 message.setContent(messageContent.getContent());
+
+                strValue = resultSet.getString(index++);
+                strValue = strValue == null ? "" : strValue;
+                message.setSearchable(strValue);
                 message.setTimestamp(resultSet.getTimestamp(index++).getTime());
                 message.setConversationType(resultSet.getInt(index++));
 
