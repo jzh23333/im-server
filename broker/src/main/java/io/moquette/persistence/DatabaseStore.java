@@ -918,10 +918,10 @@ public class DatabaseStore {
             " left join t_user t3 on t1._target = t3._uid" +
             " where 1=1";
         if (conversationType > 0) {
-            sql += "t1._content_type = ?";
+            sql += " and t1._content_type = ?";
         }
         if (messageType > 0) {
-            sql += "t1._type = ?";
+            sql += " and t1._type = ?";
         }
         if (!StringUtil.isNullOrEmpty(searchable)) {
             sql += " and t1._searchable_key like ?";
@@ -997,10 +997,10 @@ public class DatabaseStore {
             " from " + MessageShardingUtil.getMessageTable(MessageShardingUtil.getMsgIdFromTimestamp(timestamp)) +" t1" +
             " where 1=1";
         if (conversationType > 0) {
-            sql += "t1._content_type = ?";
+            sql += " and t1._content_type = ?";
         }
         if (messageType > 0) {
-            sql += "t1._type = ?";
+            sql += " and t1._type = ?";
         }
         if (!StringUtil.isNullOrEmpty(searchable)) {
             sql += " and t1._searchable_key like ?";
