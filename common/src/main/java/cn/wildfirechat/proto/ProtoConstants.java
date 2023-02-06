@@ -244,6 +244,7 @@ public class ProtoConstants {
         int Group_Member_Event_Type_Update = 3;
         int Group_Member_Event_Alias = 4;
         int Group_Member_Event_Extra = 5;
+        int Group_Member_Event_Silent = 6;
     }
 
     public interface ChannelUpdateEventType {

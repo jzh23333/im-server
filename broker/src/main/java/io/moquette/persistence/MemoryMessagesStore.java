@@ -2106,7 +2106,7 @@ public class MemoryMessagesStore implements IMessagesStore {
         databaseStore.persistGroupInfo(groupInfo.toBuilder().setUpdateDt(updateDt).setMemberUpdateDt(updateDt).build());
         mIMap.evict(groupId);
 
-        callbackGroupMemberEvent(operator, groupId, userList, ProtoConstants.GroupMemberUpdateEventType.Group_Member_Event_Type_Update, (type == 0 ? GroupMemberType_Normal : GroupMemberType_Silent) + "");
+        callbackGroupMemberEvent(operator, groupId, userList, ProtoConstants.GroupMemberUpdateEventType.Group_Member_Event_Silent, (type == 0 ? GroupMemberType_Normal : GroupMemberType_Silent) + "");
         return ErrorCode.ERROR_CODE_SUCCESS;
     }
 
