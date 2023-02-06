@@ -16,16 +16,17 @@
 
 package io.moquette.persistence;
 
+import cn.wildfirechat.common.ErrorCode;
 import cn.wildfirechat.pojos.*;
 import cn.wildfirechat.proto.ProtoConstants;
 import cn.wildfirechat.proto.WFCMessage;
-import com.google.gson.Gson;
 import com.google.protobuf.ByteString;
-import com.hazelcast.core.*;
+import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.IMap;
+import com.hazelcast.core.MultiMap;
 import com.hazelcast.util.StringUtil;
 import com.xiaoleilu.loServer.action.admin.AdminAction;
 import com.xiaoleilu.loServer.model.FriendData;
-import cn.wildfirechat.common.ErrorCode;
 import io.moquette.BrokerConstants;
 import io.moquette.imhandler.IMHandler;
 import io.moquette.server.Constants;
@@ -33,8 +34,8 @@ import io.moquette.server.Server;
 import io.moquette.spi.IMatchingCondition;
 import io.moquette.spi.IMessagesStore;
 import io.moquette.spi.impl.security.AES;
-import io.moquette.spi.security.Tokenor;
 import io.moquette.spi.impl.subscriptions.Topic;
+import io.moquette.spi.security.Tokenor;
 import io.netty.handler.codec.mqtt.MqttVersion;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.json.simple.JSONObject;
@@ -55,6 +56,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Consumer;
 
 import static cn.wildfirechat.common.IMExceptionEvent.EventType.EVENT_CALLBACK_Exception;
+import static cn.wildfirechat.pojos.MyInfoType.*;
 import static cn.wildfirechat.proto.ProtoConstants.ChannelState.*;
 import static cn.wildfirechat.proto.ProtoConstants.ChannelUpdateEventType.*;
 import static cn.wildfirechat.proto.ProtoConstants.ChatroomMemberUpdateEventType.Chatroom_Member_Event_Join;
@@ -70,7 +72,6 @@ import static cn.wildfirechat.proto.ProtoConstants.UpdateUserInfoMask.*;
 import static io.moquette.BrokerConstants.*;
 import static io.moquette.server.Constants.MAX_CHATROOM_MESSAGE_QUEUE;
 import static io.moquette.server.Constants.MAX_MESSAGE_QUEUE;
-import static cn.wildfirechat.pojos.MyInfoType.*;
 import static win.liyufan.im.UserSettingScope.kUserSettingPCOnline;
 
 public class MemoryMessagesStore implements IMessagesStore {
@@ -2094,9 +2095,10 @@ public class MemoryMessagesStore implements IMessagesStore {
             members = loadGroupMemberFromDB(hzInstance, groupId);
         }
         for (WFCMessage.GroupMember member : members) {
-            if (userList.contains(member.getMemberId())) {
+            if (userList.contains(member.getMemberId())
+                && (member.getType() == GroupMemberType_Normal || member.getType() == GroupMemberType_Silent)) {
                 groupMembers.remove(groupId, member);
-                member = member.toBuilder().setType(type == 0 ? ProtoConstants.GroupMemberType.GroupMemberType_Normal : GroupMemberType_Silent).setUpdateDt(updateDt).build();
+                member = member.toBuilder().setType(type == 0 ? GroupMemberType_Normal : GroupMemberType_Silent).setUpdateDt(updateDt).build();
                 databaseStore.persistGroupMember(groupId, Arrays.asList(member), false);
                 groupMembers.put(groupId, member);
             }
@@ -2104,7 +2106,7 @@ public class MemoryMessagesStore implements IMessagesStore {
         databaseStore.persistGroupInfo(groupInfo.toBuilder().setUpdateDt(updateDt).setMemberUpdateDt(updateDt).build());
         mIMap.evict(groupId);
 
-        callbackGroupMemberEvent(operator, groupId, userList, ProtoConstants.GroupMemberUpdateEventType.Group_Member_Event_Type_Update, (type == 0 ? ProtoConstants.GroupMemberType.GroupMemberType_Normal : ProtoConstants.GroupMemberType.GroupMemberType_Manager) + "");
+        callbackGroupMemberEvent(operator, groupId, userList, ProtoConstants.GroupMemberUpdateEventType.Group_Member_Event_Type_Update, (type == 0 ? GroupMemberType_Normal : GroupMemberType_Silent) + "");
         return ErrorCode.ERROR_CODE_SUCCESS;
     }
 

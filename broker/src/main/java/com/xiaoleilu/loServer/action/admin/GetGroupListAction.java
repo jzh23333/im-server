@@ -3,17 +3,16 @@ package com.xiaoleilu.loServer.action.admin;
 
 import cn.wildfirechat.common.APIPath;
 import cn.wildfirechat.common.ErrorCode;
-import cn.wildfirechat.pojos.*;
-import cn.wildfirechat.proto.WFCMessage;
+import cn.wildfirechat.pojos.InputGetGroup;
+import cn.wildfirechat.pojos.OutputGroupList;
+import cn.wildfirechat.pojos.PojoGroupInfo;
 import com.xiaoleilu.loServer.RestResult;
 import com.xiaoleilu.loServer.annotation.HttpMethod;
 import com.xiaoleilu.loServer.annotation.Route;
 import com.xiaoleilu.loServer.handler.Request;
 import com.xiaoleilu.loServer.handler.Response;
 import io.netty.handler.codec.http.FullHttpRequest;
-import io.netty.util.internal.StringUtil;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Route(APIPath.Group_List)
