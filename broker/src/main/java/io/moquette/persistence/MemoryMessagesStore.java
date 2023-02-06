@@ -2072,7 +2072,7 @@ public class MemoryMessagesStore implements IMessagesStore {
     }
 
     @Override
-    public ErrorCode silentGroupMember(String operator, String groupId, int type, List<String> userList, boolean isAdmin) {
+    public ErrorCode muteGroupMember(String operator, String groupId, int type, List<String> userList, boolean isAdmin) {
         HazelcastInstance hzInstance = m_Server.getHazelcastInstance();
         IMap<String, WFCMessage.GroupInfo> mIMap = hzInstance.getMap(GROUPS_MAP);
 

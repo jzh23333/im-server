@@ -10,8 +10,8 @@ import win.liyufan.im.IMTopic;
 
 import static cn.wildfirechat.common.ErrorCode.ERROR_CODE_SUCCESS;
 
-@Handler(IMTopic.SilentGroupMemberTopic)
-public class SilentGroupMemberHandler extends GroupHandler<WFCMessage.SetGroupManagerRequest> {
+@Handler(IMTopic.MuteGroupMemberTopic)
+public class MuteGroupMemberHandler extends GroupHandler<WFCMessage.SetGroupManagerRequest> {
     @Override
     public ErrorCode action(ByteBuf ackPayload, String clientID, String fromUser, ProtoConstants.RequestSourceType requestSourceType, WFCMessage.SetGroupManagerRequest request, Qos1PublishHandler.IMCallback callback) {
         boolean isAdmin = requestSourceType == ProtoConstants.RequestSourceType.Request_From_Admin;
@@ -29,18 +29,12 @@ public class SilentGroupMemberHandler extends GroupHandler<WFCMessage.SetGroupMa
             }
         }
 
-        ErrorCode errorCode = m_messagesStore.silentGroupMember(fromUser, request.getGroupId(), request.getType(), request.getUserIdList(), isAdmin);
+        ErrorCode errorCode = m_messagesStore.muteGroupMember(fromUser, request.getGroupId(), request.getType(), request.getUserIdList(), isAdmin);
         if (errorCode == ERROR_CODE_SUCCESS) {
             if (request.hasNotifyContent() && request.getNotifyContent().getType() > 0) {
                 sendGroupNotification(fromUser, request.getGroupId(), request.getToLineList(), request.getNotifyContent());
             } else {
-                WFCMessage.MessageContent content = null;
-                if (request.getType() == 0) {
-                    content = new GroupNotificationBinaryContent(request.getGroupId(), fromUser, request.getType() + "", request.getUserIdList()).getMuteGroupMemberNotifyContent();
-
-                } else {
-                    content = new GroupNotificationBinaryContent(request.getGroupId(), fromUser, request.getType() + "", request.getUserIdList()).getAllowGroupMemberNotifyContent();
-                }
+                WFCMessage.MessageContent content = new GroupNotificationBinaryContent(request.getGroupId(), fromUser, request.getType() + "", request.getUserIdList()).getMuteGroupMemberNotifyContent();
                 sendGroupNotification(fromUser, request.getGroupId(), request.getToLineList(), content);
             }
         }

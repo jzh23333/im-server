@@ -125,7 +125,7 @@ public interface IMessagesStore {
     ErrorCode getGroupMembers(String fromUser, String groupId, long maxDt, List<WFCMessage.GroupMember> members);
     WFCMessage.GroupMember getGroupMember(String groupId, String memberId);
     ErrorCode transferGroup(String operator, String groupId, String newOwner, boolean isAdmin);
-    ErrorCode silentGroupMember(String operator, String groupId, int type, List<String> userList, boolean isAdmin);
+    ErrorCode muteGroupMember(String operator, String groupId, int type, List<String> userList, boolean isAdmin);
     ErrorCode setGroupManager(String operator, String groupId, int type, List<String> userList, boolean isAdmin);
     boolean isMemberInGroup(String member, String groupId);
     ErrorCode canSendMessageInGroup(String member, String groupId);
