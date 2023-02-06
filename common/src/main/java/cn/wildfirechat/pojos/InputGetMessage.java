@@ -49,19 +49,19 @@ public class InputGetMessage {
         this.timestamp = timestamp;
     }
 
-    public int getConversationType() {
+    public Integer getConversationType() {
         return conversationType;
     }
 
-    public void setConversationType(int conversationType) {
+    public void setConversationType(Integer conversationType) {
         this.conversationType = conversationType;
     }
 
-    public int getMessageType() {
+    public Integer getMessageType() {
         return messageType;
     }
 
-    public void setMessageType(int messageType) {
+    public void setMessageType(Integer messageType) {
         this.messageType = messageType;
     }
 }
