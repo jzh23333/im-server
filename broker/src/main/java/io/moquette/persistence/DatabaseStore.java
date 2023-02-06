@@ -918,10 +918,10 @@ public class DatabaseStore {
             " left join t_user t3 on t1._target = t3._uid" +
             " left join t_group t4 on t1._target = t4._gid" +
             " where 1=1";
-        if (conversationType > 0) {
+        if (conversationType != null) {
             sql += " and t1._content_type = ?";
         }
-        if (messageType > 0) {
+        if (messageType != null) {
             sql += " and t1._type = ?";
         }
         if (!StringUtil.isNullOrEmpty(searchable)) {
