@@ -2241,7 +2241,6 @@ public class MemoryMessagesStore implements IMessagesStore {
 
         MessageBundle messageBundle = mIMap.get(messageUid);
         if (messageBundle != null) {
-            LOG.info("Come in here 1...");
             WFCMessage.Message message = messageBundle.getMessage();
             boolean canRecall = false;
             if (isAdmin) {
@@ -2261,7 +2260,6 @@ public class MemoryMessagesStore implements IMessagesStore {
             if(message.getContent().getType() == 80) {
                 return ErrorCode.ERROR_CODE_SUCCESS;
             }
-            LOG.info("Come in here 2...");
 
             JSONObject json = new JSONObject();
             json.put("s", message.getFromUser());
@@ -2292,7 +2290,7 @@ public class MemoryMessagesStore implements IMessagesStore {
                 .setPersistFlag(1)
                 .setExpireDuration(0)
                 .setMentionedType(0)
-                .setType(80)
+                .setType(81)
                 .setData(ByteString.copyFrom(String.valueOf(messageUid).getBytes()))
                 .setPushData(pushData.toJSONString())
                 .setExtra(recalledContent)).build();
@@ -2301,11 +2299,10 @@ public class MemoryMessagesStore implements IMessagesStore {
 
             databaseStore.deleteMessage(messageUid);
             
-            LOG.info("Come in here 3...");
-
             mIMap.put(messageUid, messageBundle, 7, TimeUnit.DAYS);
             return ErrorCode.ERROR_CODE_SUCCESS;
         } else {
+
             return ErrorCode.ERROR_CODE_NOT_EXIST;
         }
     }
