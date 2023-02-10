@@ -88,8 +88,8 @@ JAVA_OPTS="$JAVA_OPTS -XX:MaxGCPauseMillis=500"
 #echo "警告：没有设置JVM内存参数！"
 #echo "请设置JVM参数Xmx和Xms，设置为您为IM服务预留的内存大小，注意需要刨除操作系统占用，如果有其它系统也需要相应去除占用。"
 #echo ""
-JAVA_OPTS="$JAVA_OPTS -Xmx4G"
-JAVA_OPTS="$JAVA_OPTS -Xms4G"
+JAVA_OPTS="$JAVA_OPTS -Xmx8G"
+JAVA_OPTS="$JAVA_OPTS -Xms8G"
 
 
 $JAVA -server $JAVA_OPTS $JAVA_OPTS_SCRIPT -Dlog4j.configurationFile="file:$LOG_FILE" -Dlog4j2.formatMsgNoLookups=true -Dcom.mchange.v2.c3p0.cfg.xml="$C3P0_CONF_FILE" -Dhazelcast.configuration=$HZ_CONF_FILE -Dwildfirechat.path="$WILDFIRECHAT_CONFIG_PATH" -cp "$WILDFIRECHAT_HOME/lib/*" cn.wildfirechat.server.Server
