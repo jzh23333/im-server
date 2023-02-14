@@ -20,6 +20,7 @@ import win.liyufan.im.IMTopic;
 public class JoinChatroomHandler extends IMHandler<WFCMessage.IDBuf> {
     @Override
     public ErrorCode action(ByteBuf ackPayload, String clientID, String fromUser, ProtoConstants.RequestSourceType requestSourceType, WFCMessage.IDBuf request, Qos1PublishHandler.IMCallback callback) {
+        LOG.info("joinChatRoom: {}", request.getId());
         return m_messagesStore.handleJoinChatroom(fromUser, clientID, request.getId());
     }
 }
