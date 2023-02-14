@@ -37,10 +37,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static cn.wildfirechat.common.ErrorCode.ERROR_CODE_SUCCESS;
 import static io.moquette.BrokerConstants.CLIENT_REQUEST_RATE_LIMIT;
@@ -253,27 +250,27 @@ abstract public class IMHandler<T> {
 
     }
     protected long publish(String username, String clientID, WFCMessage.Message message, ProtoConstants.RequestSourceType requestSourceType) {
-//        Set<String> notifyReceivers = new LinkedHashSet<>();
-//
-//        WFCMessage.Message.Builder messageBuilder = message.toBuilder();
-//        int pullType = m_messagesStore.getNotifyReceivers(username, messageBuilder, notifyReceivers, requestSourceType);
-//        mServer.getImBusinessScheduler().execute(() -> this.publisher.publish2Receivers(messageBuilder.build(), notifyReceivers, clientID, pullType));
-//        return notifyReceivers.size();
-        asyncPublish(username, clientID, message, requestSourceType);
-        return 0;
+        Set<String> notifyReceivers = new LinkedHashSet<>();
+
+        WFCMessage.Message.Builder messageBuilder = message.toBuilder();
+        int pullType = m_messagesStore.getNotifyReceivers(username, messageBuilder, notifyReceivers, requestSourceType);
+        mServer.getImBusinessScheduler().execute(() -> this.publisher.publish2Receivers(messageBuilder.build(), notifyReceivers, clientID, pullType));
+        return notifyReceivers.size();
+//        asyncPublish(username, clientID, message, requestSourceType);
+//        return 0;
     }
 
     protected long saveAndPublish(String username, String clientID, WFCMessage.Message message, ProtoConstants.RequestSourceType requestSourceType) {
-//        Set<String> notifyReceivers = new LinkedHashSet<>();
+        Set<String> notifyReceivers = new LinkedHashSet<>();
 //
         message = m_messagesStore.storeMessage(username, clientID, message);
 
-//        WFCMessage.Message.Builder messageBuilder = message.toBuilder();
-//        int pullType = m_messagesStore.getNotifyReceivers(username, messageBuilder, notifyReceivers, requestSourceType);
-//        mServer.getImBusinessScheduler().execute(() -> this.publisher.publish2Receivers(messageBuilder.build(), notifyReceivers, clientID, pullType));
-//        return notifyReceivers.size();
-        asyncPublish(username, clientID, message, requestSourceType);
-        return 0;
+        WFCMessage.Message.Builder messageBuilder = message.toBuilder();
+        int pullType = m_messagesStore.getNotifyReceivers(username, messageBuilder, notifyReceivers, requestSourceType);
+        mServer.getImBusinessScheduler().execute(() -> this.publisher.publish2Receivers(messageBuilder.build(), notifyReceivers, clientID, pullType));
+        return notifyReceivers.size();
+//        asyncPublish(username, clientID, message, requestSourceType);
+//        return 0;
     }
 
     protected void asyncPublish(String username, String clientID, WFCMessage.Message message, ProtoConstants.RequestSourceType requestSourceType) {
