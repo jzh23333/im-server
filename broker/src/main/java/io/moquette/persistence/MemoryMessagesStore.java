@@ -1097,7 +1097,7 @@ public class MemoryMessagesStore implements IMessagesStore {
         // 这里选择使用后面一种情况
         long messageSeq = 0;
 
-        mWriteLock.lock();
+//        mWriteLock.lock();
         try {
             TreeMap<Long, Long> maps = chatroomMessages.get(target);
             if (maps == null) {
@@ -1120,7 +1120,7 @@ public class MemoryMessagesStore implements IMessagesStore {
                 maps.remove(maps.firstKey());
             }
         } finally {
-            mWriteLock.unlock();
+//            mWriteLock.unlock();
         }
 
         return messageSeq;
